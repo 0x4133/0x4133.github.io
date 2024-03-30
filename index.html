@@ -16,14 +16,14 @@
                 <li><a href="#">Home</a></li>
                 <li><a href="#">Articles</a></li>
                 <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <section class="hero">
-            <h2>0x4133's GIF dump </h2>
+            <h2>Welcome to Hacker's Blog</h2>
             <p>Explore the world of cybersecurity, hacking techniques, and technology insights.</p>
             <a href="#" class="cta-button">Read Latest Articles</a>
         </section>
@@ -50,7 +50,16 @@
                 </article>
             </div>
         </section>
-        <section class="contact">
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Hacker's Blog. All rights reserved.</p>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
             <h2>Contact Me</h2>
             <form id="contactForm" action="https://formspree.io/f/xbjnzapq" method="POST">
                 <div class="form-group">
@@ -67,13 +76,8 @@
                 </div>
                 <button type="submit">Send Message</button>
             </form>
-        </section>
-
-    </main>
-
-    <footer>
-        <p>&copy; 2023 Hacker's Blog. All rights reserved.</p>
-    </footer>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
