@@ -10,7 +10,9 @@ def update_article(article_number):
         html_content = file.read()
 
     # Find the position of the article to update
-    article_start = html_content.find(f"<article>", article_number - 1)
+    article_start = html_content.find(
+        f'<article data-image="image{article_number}.png">'
+    )
     article_end = html_content.find("</article>", article_start)
 
     # Extract the existing article HTML
@@ -40,7 +42,7 @@ def update_article(article_number):
 
 def main():
     while True:
-        print("\n--- Hacker's Blog Article Management ---")
+        print("\n--- Strategic Bytes Article Management ---")
         print("1. Update Article 1")
         print("2. Update Article 2")
         print("3. Update Article 3")
@@ -63,5 +65,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # ... (existing code remains the same)

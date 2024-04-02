@@ -108,3 +108,64 @@ window.addEventListener('click', function (e) {
         e.target.style.display = 'none';
     }
 });
+
+// Get the dropdown menu elements
+const bytesDropdown = document.getElementById('bytesDropdown');
+const bytesMenu = document.getElementById('bytesMenu');
+
+// Toggle the dropdown menu when the "Bytes" button is clicked
+bytesDropdown.addEventListener('click', function (e) {
+    e.preventDefault();
+    bytesMenu.style.display = bytesMenu.style.display === 'block' ? 'none' : 'block';
+});
+
+// Close the dropdown menu when clicking outside of it
+window.addEventListener('click', function (e) {
+    if (!bytesDropdown.contains(e.target)) {
+        bytesMenu.style.display = 'none';
+    }
+});
+
+// Function to populate the dropdown menu with past posts
+function populateDropdownMenu() {
+    const dropdownContent = bytesMenu.querySelector('.dropdown-content');
+
+    // Clear existing content
+    dropdownContent.innerHTML = '';
+
+    // Add past posts to the dropdown menu
+    const pastPosts = [
+        { title: 'Post 1', url: '#' },
+        { title: 'Post 2', url: '#' },
+        { title: 'Post 3', url: '#' },
+        // Add more past posts as needed
+    ];
+
+    pastPosts.forEach(post => {
+        const link = document.createElement('a');
+        link.textContent = post.title;
+        link.href = post.url;
+        dropdownContent.appendChild(link);
+    });
+}
+
+// Open the article modal when the "Read More" button is clicked
+document.querySelectorAll('.read-more-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const articleNumber = this.getAttribute('data-article');
+        const articleModal = document.getElementById(`articleModal${articleNumber}`);
+        const articleTitle = document.getElementById(`articleTitle${articleNumber}`);
+        const articleImage = document.getElementById(`articleImage${articleNumber}`);
+        const articleContent = document.getElementById(`articleContent${articleNumber}`);
+
+        // Set the article title, image, and content
+        articleTitle.textContent = this.parentElement.querySelector('h3').textContent;
+        articleImage.src = this.parentElement.getAttribute('data-image');
+        articleContent.innerHTML = this.parentElement.querySelector('.article-content').innerHTML;
+
+        articleModal.style.display = 'block';
+    });
+});
+// Populate the dropdown menu when the page loads
+populateDropdownMenu();

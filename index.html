@@ -14,7 +14,14 @@
         <nav>
             <ul>
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Bytes</a></li>
+                <li>
+                    <a href="#" id="bytesDropdown">Bytes</a>
+                    <div id="bytesMenu" class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <!-- Past posts will be dynamically added here -->
+                        </div>
+                    </div>
+                </li>
                 <li><a href="#">About</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
@@ -31,10 +38,61 @@
         <section class="bytes">
             <h2>Featured Bytes</h2>
             <div class="article-grid">
-                <article data-image="image1.png">
-                    <h3>Test1</h3>
-                    <p>The block</p>
+                <article data-image="image1.jpeg">
+                    <h3>Tracking a Bluetooth Beacon with Dual HackRFs and Sparrow GPS</h3>
+                    <p>In this post, I'll share my experience of tracking a Bluetooth beacon using two HackRF One
+                        software-defined radios (SDRs) and the Sparrow GPS module. By leveraging the power of the Mayhem
+                        firmware and the Received Signal Strength Indicator (RSSI), I was able to accurately locate and
+                        track the beacon's position in real-time.</p>
+                    <div class="article-content">
+                        <p>The Setup: To embark on this project, I equipped myself with two HackRF One SDRs, each
+                            running the Mayhem firmware. The Mayhem firmware is a custom firmware for HackRF that
+                            enables advanced features and capabilities beyond the stock firmware. One of the key
+                            features I utilized was the ability to capture and analyze Bluetooth packets.</p>
+                        <p>I connected one of the HackRFs to my computer and used it as the primary receiver. The other
+                            HackRF was configured as a standalone device, running the Mayhem firmware autonomously. This
+                            allowed me to place the standalone HackRF in different locations to capture Bluetooth
+                            signals from various angles.</p>
+                        <p>Capturing Bluetooth Packets: With the HackRFs set up, I proceeded to capture Bluetooth
+                            packets emitted by the beacon. The Mayhem firmware's built-in Bluetooth scanning
+                            functionality made this process straightforward. I configured the firmware to capture
+                            packets on the specific Bluetooth channels used by the beacon.</p>
+                        <p>As the HackRFs captured the Bluetooth packets, I focused on the RSSI values associated with
+                            each packet. RSSI is a measure of the signal strength received by the radio, and it can be
+                            used to estimate the proximity of the beacon to the receiver. By analyzing the RSSI values
+                            from both HackRFs, I could triangulate the approximate location of the beacon.</p>
+                        <p>Integrating Sparrow GPS: To add a geospatial context to the tracking process, I integrated
+                            the Sparrow GPS module with the standalone HackRF. The Sparrow GPS module is a compact and
+                            reliable GPS receiver that can provide accurate location information.</p>
+                        <p>By connecting the Sparrow GPS module to the standalone HackRF, I was able to associate GPS
+                            coordinates with each captured Bluetooth packet. This allowed me to map the beacon's
+                            location on a geographical level, providing a visual representation of its movement over
+                            time.</p>
+                        <p>Data Analysis and Visualization: With the captured Bluetooth packets and associated GPS
+                            coordinates, I proceeded to analyze the data using custom scripts and visualization tools. I
+                            developed a Python script that parsed the captured packets, extracted the relevant
+                            information (such as RSSI values and GPS coordinates), and stored it in a structured format.
+                        </p>
+                        <p>Using mapping libraries and data visualization frameworks, I created interactive maps that
+                            displayed the beacon's location and movement based on the captured data. The maps provided a
+                            clear visual representation of the beacon's path, allowing me to track its position and
+                            analyze its behavior over time.</p>
+                        <p>Conclusion: By combining the capabilities of two HackRF One SDRs running the Mayhem firmware,
+                            along with the Sparrow GPS module, I successfully tracked a Bluetooth beacon with high
+                            accuracy. The RSSI values captured by the HackRFs enabled me to estimate the beacon's
+                            proximity, while the GPS coordinates provided by the Sparrow module added a geospatial
+                            context to the tracking process.</p>
+                        <p>This project demonstrates the power and versatility of SDRs and custom firmware in wireless
+                            security research. By leveraging these tools and techniques, researchers and enthusiasts can
+                            explore and analyze various wireless protocols, including Bluetooth, and gain valuable
+                            insights into their behavior and security implications.</p>
+                        <p>I hope this post has provided you with a glimpse into the exciting world of wireless hacking
+                            and inspired you to explore similar projects. Remember to always use these techniques
+                            responsibly and legally. Happy hacking!</p>
+                        <p>#HackRF #MayhemFirmware #BluetoothTracking #SparrowGPS #WirelessHacking</p>
+                    </div>
                     <a href="#" class="read-more-btn" data-article="1">Read More</a>
+                </article>
                 </article>
                 <article data-image="image2.png">
                     <h3>Protecting Your Online Privacy</h3>
@@ -42,11 +100,13 @@
                         age.</p>
                     <a href="#" class="read-more-btn" data-article="2">Read More</a>
                 </article>
-                <article data-image="image3.png">
-                    <h3>Exploiting Web Vulnerabilities</h3>
-                    <p>Explore common web vulnerabilities and how hackers exploit them to compromise websites.</p>
-                    <a href="#" class="read-more-btn" data-article="3">Read More</a>
-                </article>
+                
+    <article data-image="image.png">
+        <h3>Test 3</h3>
+        <p>Content</p>
+        <a href="#" class="read-more-btn" data-article="3">Read More</a>
+    </article>
+    
             </div>
         </section>
     </main>
