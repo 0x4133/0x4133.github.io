@@ -49,25 +49,62 @@ document.getElementById('contactForm').addEventListener('submit', function (e) {
         });
 });
 
-// Get the latest articles modal and close button elements
+// Get the latest bytes modal and close button elements
 const latestModal = document.getElementById('latestModal');
 const latestCloseBtn = latestModal.querySelector('.close');
 const readLatestBtn = document.getElementById('readLatestBtn');
 
-// Open the latest articles modal when the "Read Latest" button is clicked
+// Open the latest bytes modal when the "Read Latest" button is clicked
 readLatestBtn.addEventListener('click', function (e) {
     e.preventDefault();
     latestModal.style.display = 'block';
 });
 
-// Close the latest articles modal when the close button is clicked
+// Close the latest bytes modal when the close button is clicked
 latestCloseBtn.addEventListener('click', function () {
     latestModal.style.display = 'none';
 });
 
-// Close the latest articles modal when clicking outside the modal content
+// Close the latest bytes modal when clicking outside the modal content
 window.addEventListener('click', function (e) {
     if (e.target === latestModal) {
         latestModal.style.display = 'none';
+    }
+});
+
+// Get the article modals and close buttons
+const articleModals = document.querySelectorAll('.modal');
+const articleCloseBtns = document.querySelectorAll('.close');
+
+// Open the article modal when the "Read More" button is clicked
+document.querySelectorAll('.read-more-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const articleNumber = this.getAttribute('data-article');
+        const articleModal = document.getElementById(`articleModal${articleNumber}`);
+        const articleTitle = document.getElementById(`articleTitle${articleNumber}`);
+        const articleImage = document.getElementById(`articleImage${articleNumber}`);
+        const articleContent = document.getElementById(`articleContent${articleNumber}`);
+
+        // Set the article title, image, and content
+        articleTitle.textContent = this.parentElement.querySelector('h3').textContent;
+        articleImage.src = this.parentElement.getAttribute('data-image');
+        articleContent.textContent = this.parentElement.querySelector('p').textContent;
+
+        articleModal.style.display = 'block';
+    });
+});
+
+// Close the article modal when the close button is clicked
+articleCloseBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        this.closest('.modal').style.display = 'none';
+    });
+});
+
+// Close the article modal when clicking outside the modal content
+window.addEventListener('click', function (e) {
+    if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
     }
 });
