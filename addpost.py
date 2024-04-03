@@ -1,6 +1,3 @@
-import os
-
-
 def update_article(article_number):
     title = input(f"Enter the title for article {article_number}: ")
     content = input(f"Enter the content for article {article_number}: ")
