@@ -100,13 +100,66 @@
                         age.</p>
                     <a href="#" class="read-more-btn" data-article="2">Read More</a>
                 </article>
-                
-    <article data-image="image.png">
-        <h3>Test 3</h3>
-        <p>Content</p>
-        <a href="#" class="read-more-btn" data-article="3">Read More</a>
-    </article>
-    
+
+                <article data-image="image3.webp">
+                    <h3>Exploring the xz Backdoor (CVE-2024-3094) with xzbot
+                    </h3>
+
+                    <p>The recent discovery of the xz backdoor, identified as CVE-2024-3094, has raised concerns in
+                        the
+                        cybersecurity community. To help researchers and enthusiasts better understand and analyze
+                        this
+                        vulnerability, the xzbot project has been created on GitHub.
+                    <div class="article-content">
+                        xzbot is an open-source repository that provides a comprehensive exploration of the xz
+                        backdoor.
+                        It offers a range of tools and resources to facilitate the study and detection of exploit
+                        attempts targeting this vulnerability.
+
+                        One of the key components of xzbot is the honeypot. It simulates a vulnerable server,
+                        allowing
+                        researchers to observe and capture attempts to exploit the xz backdoor in a controlled
+                        environment. By deploying this honeypot, organizations can gain valuable insights into the
+                        tactics and techniques used by attackers targeting this vulnerability.
+
+                        To enhance the security of the xz library, xzbot includes an ed448 patch. This patch
+                        modifies
+                        the liblzma.so library to utilize a custom ED448 public key. By applying this patch, users
+                        can
+                        mitigate the risk of unauthorized access through the backdoor.
+
+                        Understanding the format of the backdoor payload is crucial for effective analysis and
+                        detection. xzbot provides detailed documentation on the structure and composition of the
+                        backdoor payload. This information enables researchers to develop targeted detection
+                        mechanisms
+                        and signatures to identify and block malicious payloads.
+
+                        For those interested in demonstrating the impact of the xz backdoor, xzbot offers a
+                        command-line
+                        interface (CLI) tool. This tool allows users to trigger remote code execution (RCE) on a
+                        vulnerable system, assuming knowledge of the corresponding ED448 private key. While this
+                        feature
+                        is intended for educational and research purposes, it highlights the severity of the
+                        vulnerability and the importance of proper mitigation measures.
+
+                        The xzbot project serves as a valuable resource for the cybersecurity community, empowering
+                        researchers, developers, and security professionals to study and address the xz backdoor
+                        effectively. By collaborating and sharing knowledge through this open-source initiative, we
+                        can
+                        collectively enhance our understanding of this vulnerability and develop robust defenses
+                        against
+                        potential exploits.
+
+                        To get started with xzbot and contribute to the ongoing research efforts, visit the GitHub
+                        repository at [https://github.com/amlweems/xzbot](https://github.com/amlweems/xzbot).
+                        Together,
+                        let's work towards a more secure digital landscape by exploring and mitigating the risks
+                        posed
+                        by the xz backdoor.</p>
+                    </div>
+                    <a href="#" class="read-more-btn" data-article="3">Read More</a>
+                </article>
+
             </div>
         </section>
     </main>
