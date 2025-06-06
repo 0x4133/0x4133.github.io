@@ -135,10 +135,10 @@ function populateDropdownMenu() {
 
     // Add past posts to the dropdown menu
     const pastPosts = [
-        { title: 'Post 1', url: '#' },
-        { title: 'Post 2', url: '#' },
-        { title: 'Post 3', url: '#' },
-        // Add more past posts as needed
+        { title: 'Tracking a Bluetooth Beacon', url: '#' },
+        { title: 'Strategic Defenses: MDR vs In-House', url: '#' },
+        { title: 'Exploring the xz Backdoor', url: '#' },
+        { title: 'Upcoming Projects: A Sneak Peek', url: '#' },
     ];
 
     pastPosts.forEach(post => {
