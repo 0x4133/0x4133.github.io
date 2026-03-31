@@ -1,354 +1,2304 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strategic Bytes</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>eth0</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--border:#252525;--text:#c8c8c8;
+--dim:#555;--accent:#0c6;--accent2:#0af;--red:#c33;--yellow:#cc0;--orange:#e80;
+--user-bg:#0f1f0f;--ai-bg:#141414}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
+font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{cursor:pointer;font-family:inherit}
+
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:6px 12px;
+display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+header h1{font-size:15px;color:var(--accent);font-weight:normal;white-space:nowrap}
+.hdr-status{display:flex;gap:10px;font-size:11px;color:var(--dim);align-items:center;flex-wrap:wrap}
+.hdr-status .st{display:flex;align-items:center;gap:3px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot.on{background:var(--accent)}.dot.off{background:#333}.dot.warn{background:var(--orange)}
+.hdr-right{display:flex;gap:6px;align-items:center}
+.hdr-right select,.hdr-right button,.hdr-right input{background:var(--bg);color:var(--text);
+border:1px solid var(--border);padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit}
+.hdr-right button:hover{border-color:var(--accent);color:var(--accent)}
+#connect-btn.connected{border-color:var(--accent);color:var(--accent)}
+
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border:none;
+border-bottom:2px solid transparent;background:none}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+#settings{display:none;background:var(--s1);border-bottom:1px solid var(--border);
+padding:10px 12px;flex-shrink:0}
+#settings.open{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#settings label{color:var(--dim);font-size:11px}
+#settings input,#settings select,#settings textarea{background:var(--bg);color:var(--text);
+border:1px solid var(--border);padding:3px 6px;font-family:inherit;font-size:11px;border-radius:3px}
+#settings input:focus,#settings select:focus{border-color:var(--accent);outline:none}
+#settings textarea{width:100%;height:40px;resize:vertical}
+.key-wrap{position:relative;display:inline-block}
+.key-wrap input{width:220px;padding-right:24px}
+.key-toggle{position:absolute;right:3px;top:50%;transform:translateY(-50%);background:none;
+border:none;color:var(--dim);cursor:pointer;font-size:12px}
+
+.tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-content.active{display:flex}
+
+/* Chat */
+#chat-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 10px;border-radius:5px;max-width:90%;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{background:var(--user-bg);border:1px solid #1a3a1a;align-self:flex-end;color:#8f8}
+.msg.assistant{background:var(--ai-bg);border:1px solid var(--border);align-self:flex-start}
+.msg.error{background:#1a0a0a;border:1px solid var(--red);color:var(--red);align-self:center;font-size:11px}
+.msg.system{color:var(--dim);align-self:center;font-size:11px;padding:4px 10px;border:1px dashed var(--border)}
+.msg .tag{font-size:10px;color:var(--dim);margin-bottom:3px}
+.msg pre{background:#050505;border:1px solid var(--border);border-radius:3px;padding:6px;margin:4px 0;overflow-x:auto;font-size:12px}
+.msg code{background:#1a1a1a;padding:1px 3px;border-radius:2px;font-size:12px}
+.msg pre code{background:none;padding:0}
+.msg h1,.msg h2,.msg h3,.msg h4{color:var(--accent);margin:8px 0 4px;font-family:inherit}
+.msg h1{font-size:16px}.msg h2{font-size:14px}.msg h3{font-size:13px}.msg h4{font-size:12px;color:var(--accent2)}
+.msg strong{color:#eee}.msg em{color:#aaa;font-style:italic}.msg del{color:var(--dim);text-decoration:line-through}
+.msg hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+.msg blockquote{border-left:3px solid var(--accent);padding:2px 8px;margin:4px 0;color:var(--dim)}
+.msg ul{margin:4px 0 4px 16px;padding:0;list-style:disc}.msg li{margin:2px 0}
+.msg a{color:var(--accent2);text-decoration:underline}
+.msg p{margin:4px 0}
+.msg table{border-collapse:collapse;margin:6px 0;width:100%;font-size:12px}
+.msg th,.msg td{border:1px solid var(--border);padding:4px 8px;text-align:left}
+.msg th{background:var(--s1);color:var(--accent);font-weight:bold}
+.msg tr:nth-child(even) td{background:#0d0d0d}
+
+/* Map */
+#map-container{flex:1;overflow:hidden;position:relative;background:var(--bg);cursor:grab}
+#map-container.dragging{cursor:grabbing}
+#map-viewport{position:absolute;top:0;left:0;transform-origin:0 0}
+.map-toolbar{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-bottom:1px solid var(--border);
+flex-shrink:0;align-items:center;flex-wrap:wrap}
+.map-toolbar button,.map-toolbar select{background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:3px 8px;font-size:11px;border-radius:3px;font-family:inherit}
+.map-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+.map-toolbar span{font-size:10px;color:var(--dim)}
+/* Node context menu */
+#node-menu{display:none;position:fixed;background:var(--s1);border:1px solid var(--accent);
+border-radius:4px;padding:4px 0;z-index:100;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,.6)}
+#node-menu.show{display:block}
+#node-menu .nm-header{padding:6px 12px;font-size:12px;color:var(--accent);border-bottom:1px solid var(--border);
+font-weight:bold;white-space:nowrap}
+#node-menu .nm-sub{padding:2px 12px;font-size:10px;color:var(--dim)}
+#node-menu button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);
+padding:5px 12px;font-size:11px;font-family:inherit;cursor:pointer}
+#node-menu button:hover{background:var(--s2);color:var(--accent)}
+#node-menu button.danger:hover{color:var(--red)}
+#node-menu hr{border:none;border-top:1px solid var(--border);margin:3px 0}
+/* Animated flow arrows */
+@keyframes flowDash{to{stroke-dashoffset:-20}}
+#map-viewport .flowPaths path,
+#map-viewport .edge-pattern path{stroke-dasharray:8 4;animation:flowDash .7s linear infinite}
+#map-viewport marker path{animation:none!important;stroke-dasharray:none!important}
+.typing::after{content:'...';animation:dots 1.5s infinite}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}
+.ctx-buttons{display:flex;gap:4px;padding:4px 12px;background:var(--s2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.ctx-btn{background:var(--bg);color:var(--dim);border:1px solid var(--border);padding:3px 8px;
+font-size:10px;border-radius:3px;font-family:inherit}
+.ctx-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Control */
+.controls{flex:1;overflow-y:auto;padding:12px}
+.ctrl-section{margin-bottom:16px}
+.ctrl-section h3{font-size:12px;color:var(--accent);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:3px}
+.ctrl-row{display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.ctrl-row label{font-size:11px;color:var(--dim);min-width:80px}
+.ctrl-btn{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:3px 10px;
+font-size:11px;border-radius:3px;font-family:inherit}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ctrl-btn.danger{color:var(--red)}.ctrl-btn.danger:hover{border-color:var(--red)}
+.wids-toggle{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--dim);cursor:pointer}
+.wids-toggle input{margin:0;accent-color:var(--accent)}
+.file-item{padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between}
+.file-item:hover{background:var(--s2);color:var(--accent)}
+.file-item.active{background:var(--s2);border-left:2px solid var(--accent)}
+.file-item .f-size{color:var(--dim);font-size:10px}
+.file-item .f-type{color:var(--yellow);font-size:9px;margin-right:4px}
+.ctrl-input{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:3px 6px;
+font-size:11px;border-radius:3px;font-family:inherit;width:130px}
+.ctrl-input:focus{border-color:var(--accent);outline:none}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px;margin-bottom:12px}
+.stat-box{background:var(--bg);border:1px solid var(--border);padding:6px 8px;border-radius:3px}
+.stat-box .val{font-size:16px;color:var(--accent);font-weight:bold}
+.stat-box .lbl{font-size:10px;color:var(--dim)}
+.cmd-toast{font-size:11px;padding:3px 8px;margin-top:3px;border-radius:3px;display:none}
+.cmd-toast.show{display:inline-block}
+.cmd-toast.ok{background:#0f1f0f;color:var(--accent);border:1px solid #1a3a1a}
+.cmd-toast.err{background:#1a0a0a;color:var(--red);border:1px solid var(--red)}
+
+/* Rules */
+.rules-list{flex:1;overflow-y:auto;padding:8px 12px}
+.rule-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--border);
+border-radius:3px;margin-bottom:4px;font-size:11px;background:var(--bg)}
+.rule-item.disabled{opacity:0.5}
+.rule-item .r-name{color:var(--accent);min-width:80px;font-weight:bold}
+.rule-item .r-type{color:var(--accent2);min-width:60px}
+.rule-item .r-val{color:var(--text);min-width:100px}
+.rule-item .r-lvl{min-width:35px}
+.rule-item .r-lvl.info{color:var(--accent)}.rule-item .r-lvl.warn{color:var(--yellow)}.rule-item .r-lvl.crit{color:var(--red)}
+.rule-item .r-hits{color:var(--dim);min-width:50px}
+.rule-item .r-actions{margin-left:auto;display:flex;gap:4px}
+.rule-item .r-actions button{background:none;border:1px solid var(--border);color:var(--dim);
+padding:1px 6px;font-size:10px;border-radius:2px;font-family:inherit;cursor:pointer}
+.rule-item .r-actions button:hover{color:var(--accent);border-color:var(--accent)}
+.rule-item .r-actions button.del:hover{color:var(--red);border-color:var(--red)}
+.rules-toolbar{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-bottom:1px solid var(--border);
+flex-shrink:0;align-items:center;flex-wrap:wrap}
+.rules-toolbar button,.rules-toolbar select,.rules-toolbar input{background:var(--bg);color:var(--text);
+border:1px solid var(--border);padding:3px 8px;font-size:11px;border-radius:3px;font-family:inherit}
+.rules-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+.rules-add{display:flex;gap:4px;padding:6px 12px;background:var(--s2);border-top:1px solid var(--border);
+flex-shrink:0;align-items:center;flex-wrap:wrap}
+.rules-add input,.rules-add select{background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit}
+.rules-add input:focus,.rules-add select:focus{border-color:var(--accent);outline:none}
+.rules-add button{background:var(--accent);color:var(--bg);border:none;padding:3px 10px;font-size:11px;
+border-radius:3px;font-weight:bold;font-family:inherit;cursor:pointer}
+#rules-import-input{display:none}
+
+/* Terminal */
+#term-output{flex:1;overflow-y:auto;padding:8px 12px;font-size:12px;white-space:pre-wrap;word-wrap:break-word;color:var(--dim)}
+#term-output .term-cmd{color:var(--accent)}
+#term-output .term-json{color:var(--accent2)}
+#term-output .term-alert{color:var(--orange)}
+#term-input-row{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-top:1px solid var(--border);flex-shrink:0}
+#term-cmd{flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:4px 8px;
+font-family:inherit;font-size:12px;border-radius:3px}
+#term-cmd:focus{border-color:var(--accent);outline:none}
+
+/* Packets */
+.pkt-toolbar{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;flex-wrap:wrap}
+.pkt-toolbar button,.pkt-toolbar select{background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:3px 8px;font-size:11px;border-radius:3px;font-family:inherit}
+.pkt-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+#pkt-list{flex:1;overflow-y:auto;font-size:11px}
+#pkt-list table{width:100%;border-collapse:collapse}
+#pkt-list th{position:sticky;top:0;background:var(--s1);border-bottom:1px solid var(--border);
+padding:4px 6px;text-align:left;font-size:10px;color:var(--dim);font-weight:normal}
+#pkt-list td{padding:3px 6px;border-bottom:1px solid #1a1a1a;white-space:nowrap;overflow:hidden;
+text-overflow:ellipsis;max-width:400px}
+#pkt-list tr:hover td{background:var(--s2)}
+.proto-tcp{color:var(--accent2)}.proto-udp{color:#9c7}.proto-arp{color:var(--orange)}
+.proto-icmp{color:var(--yellow)}.proto-other{color:var(--dim)}
+
+/* Input */
+#input-area{background:var(--s1);border-top:1px solid var(--border);padding:8px 12px;
+display:flex;gap:6px;flex-shrink:0;align-items:flex-end}
+#user-input{flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:6px 10px;font-family:inherit;font-size:13px;border-radius:4px;resize:none;
+min-height:18px;max-height:120px;line-height:1.4}
+#user-input:focus{border-color:var(--accent);outline:none}
+.input-btn{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:6px 10px;
+font-size:12px;border-radius:4px;font-family:inherit}
+.input-btn:hover{border-color:var(--accent);color:var(--accent)}
+#send-btn{background:var(--accent);color:var(--bg);border:none;padding:6px 14px;font-size:13px;
+border-radius:4px;font-weight:bold;font-family:inherit}
+#send-btn:hover{background:#0f8}
+#send-btn:disabled{background:var(--border);color:var(--dim);cursor:not-allowed}
+#pcap-input{display:none}
+
+/* Alerts SIEM */
+.alert-toolbar{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-bottom:1px solid var(--border);
+flex-shrink:0;align-items:center;flex-wrap:wrap}
+.alert-toolbar button,.alert-toolbar select{background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:3px 8px;font-size:11px;border-radius:3px;font-family:inherit}
+.alert-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+.alert-toolbar span{font-size:10px;color:var(--dim)}
+#alert-list{flex:1;overflow-y:auto;padding:0}
+.alert-row{display:flex;align-items:flex-start;gap:8px;padding:6px 12px;border-bottom:1px solid #1a1a1a;
+font-size:11px;transition:background .15s}
+.alert-row:hover{background:var(--s2)}
+.alert-row.acked{opacity:.45}
+.alert-row .a-sev{min-width:36px;padding:2px 6px;border-radius:3px;text-align:center;font-weight:bold;font-size:10px}
+.alert-row .a-sev.crit{background:#2a0a0a;color:var(--red);border:1px solid var(--red)}
+.alert-row .a-sev.warn{background:#2a2a0a;color:var(--yellow);border:1px solid var(--yellow)}
+.alert-row .a-sev.info{background:#0a1a0a;color:var(--accent);border:1px solid var(--accent)}
+.alert-row .a-count{background:#2a1a2a;color:#f0f;border:1px solid #f0f;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold}
+.alert-row .a-time{color:var(--dim);min-width:55px;font-size:10px}
+.alert-row .a-id{color:var(--dim);min-width:30px;font-size:10px}
+.alert-row .a-msg{flex:1;color:var(--text);word-break:break-word}
+.alert-row .a-actions{display:flex;gap:4px;flex-shrink:0}
+.alert-row .a-actions button{background:none;border:1px solid var(--border);color:var(--dim);
+padding:1px 6px;font-size:9px;border-radius:2px;font-family:inherit;cursor:pointer}
+.alert-row .a-actions button:hover{color:var(--accent);border-color:var(--accent)}
+.tab .badge{background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;
+margin-left:4px;vertical-align:top}
+</style>
 </head>
-
 <body>
-    <header>
-        <h1>Strategic Bytes</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li>
-                    <a href="#" id="bytesDropdown">Bytes</a>
-                    <div id="bytesMenu" class="dropdown-menu">
-                        <div class="dropdown-content">
-                            <!-- Past posts will be dynamically added here -->
-                        </div>
-                    </div>
-                </li>
-                <li><a href="#">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <main>
-        <section class="hero">
-            <h2>Welcome to Strategic Bytes</h2>
-            <p>Explore the world of cybersecurity, hacking techniques, and technology insights.</p>
-            <a href="#" class="cta-button" id="readLatestBtn">Read Latest Bytes</a>
-        </section>
+<header>
+  <h1>eth0</h1>
+  <div class="hdr-status" id="hdr-status">
+    <span class="st"><span class="dot off" id="d-serial"></span><span id="serial-label">Disconnected</span></span>
+    <span class="st"><span class="dot off" id="d-cap"></span>CAP</span>
+    <span class="st"><span class="dot off" id="d-ids"></span>IDS</span>
+    <span class="st"><span class="dot off" id="d-mitm"></span>MITM</span>
+    <span class="st"><span class="dot off" id="d-dns"></span>DNS</span>
+    <span class="st"><span class="dot off" id="d-wids"></span>WIDS</span>
+    <span class="st"><span class="dot off" id="d-wifi"></span>WiFi:<span id="wifi-count">0</span></span>
+    <span class="st"><span class="dot off" id="d-ble"></span>BLE:<span id="ble-count">0</span></span>
+    <span style="color:var(--text)" id="ip-display"></span>
+  </div>
+  <div class="hdr-right">
+    <button id="connect-btn">Connect</button>
+    <select id="provider"><option value="anthropic">Claude</option><option value="openai">OpenAI</option><option value="gemini">Gemini</option></select>
+    <button id="settings-btn">cfg</button>
+  </div>
+</header>
 
-        <section class="bytes">
-            <h2>Featured Bytes</h2>
-            <div class="article-grid">
-                <article data-image="image1.jpeg">
-                    <h3>Tracking a Bluetooth Beacon with Dual HackRFs and Sparrow GPS</h3>
-                    <p>In this post, I'll share my experience of tracking a Bluetooth beacon using two HackRF One
-                        software-defined radios (SDRs) and the Sparrow GPS module. By leveraging the power of the Mayhem
-                        firmware and the Received Signal Strength Indicator (RSSI), I was able to accurately locate and
-                        track the beacon's position in real-time.</p>
-                    <div class="article-content">
-                        <p>The Setup: To embark on this project, I equipped myself with two HackRF One SDRs, each
-                            running the Mayhem firmware. The Mayhem firmware is a custom firmware for HackRF that
-                            enables advanced features and capabilities beyond the stock firmware. One of the key
-                            features I utilized was the ability to capture and analyze Bluetooth packets.</p>
-                        <p>I connected one of the HackRFs to my computer and used it as the primary receiver. The other
-                            HackRF was configured as a standalone device, running the Mayhem firmware autonomously. This
-                            allowed me to place the standalone HackRF in different locations to capture Bluetooth
-                            signals from various angles.</p>
-                        <p>Capturing Bluetooth Packets: With the HackRFs set up, I proceeded to capture Bluetooth
-                            packets emitted by the beacon. The Mayhem firmware's built-in Bluetooth scanning
-                            functionality made this process straightforward. I configured the firmware to capture
-                            packets on the specific Bluetooth channels used by the beacon.</p>
-                        <p>As the HackRFs captured the Bluetooth packets, I focused on the RSSI values associated with
-                            each packet. RSSI is a measure of the signal strength received by the radio, and it can be
-                            used to estimate the proximity of the beacon to the receiver. By analyzing the RSSI values
-                            from both HackRFs, I could triangulate the approximate location of the beacon.</p>
-                        <p>Integrating Sparrow GPS: To add a geospatial context to the tracking process, I integrated
-                            the Sparrow GPS module with the standalone HackRF. The Sparrow GPS module is a compact and
-                            reliable GPS receiver that can provide accurate location information.</p>
-                        <p>By connecting the Sparrow GPS module to the standalone HackRF, I was able to associate GPS
-                            coordinates with each captured Bluetooth packet. This allowed me to map the beacon's
-                            location on a geographical level, providing a visual representation of its movement over
-                            time.</p>
-                        <p>Data Analysis and Visualization: With the captured Bluetooth packets and associated GPS
-                            coordinates, I proceeded to analyze the data using custom scripts and visualization tools. I
-                            developed a Python script that parsed the captured packets, extracted the relevant
-                            information (such as RSSI values and GPS coordinates), and stored it in a structured format.
-                        </p>
-                        <p>Using mapping libraries and data visualization frameworks, I created interactive maps that
-                            displayed the beacon's location and movement based on the captured data. The maps provided a
-                            clear visual representation of the beacon's path, allowing me to track its position and
-                            analyze its behavior over time.</p>
-                        <p>Conclusion: By combining the capabilities of two HackRF One SDRs running the Mayhem firmware,
-                            along with the Sparrow GPS module, I successfully tracked a Bluetooth beacon with high
-                            accuracy. The RSSI values captured by the HackRFs enabled me to estimate the beacon's
-                            proximity, while the GPS coordinates provided by the Sparrow module added a geospatial
-                            context to the tracking process.</p>
-                        <p>This project demonstrates the power and versatility of SDRs and custom firmware in wireless
-                            security research. By leveraging these tools and techniques, researchers and enthusiasts can
-                            explore and analyze various wireless protocols, including Bluetooth, and gain valuable
-                            insights into their behavior and security implications.</p>
-                        <p>I hope this post has provided you with a glimpse into the exciting world of wireless hacking
-                            and inspired you to explore similar projects. Remember to always use these techniques
-                            responsibly and legally. Happy hacking!</p>
-                        <p>#HackRF #MayhemFirmware #BluetoothTracking #SparrowGPS #WirelessHacking</p>
-                    </div>
-                    <a href="#" class="read-more-btn" data-article="1">Read More</a>
-                </article>
-                </article>
+<div id="settings">
+  <label>Key</label>
+  <div class="key-wrap">
+    <input type="password" id="api-key" placeholder="API key" autocomplete="off">
+    <button class="key-toggle" id="key-toggle" type="button">*</button>
+  </div>
+  <label>Model</label><select id="model"></select>
+  <label>Tokens</label><input type="number" id="max-tokens" value="4096" min="1" max="32768" style="width:70px">
+  <label style="width:100%">System Prompt</label>
+  <textarea id="system-prompt" placeholder="Optional system prompt..."></textarea>
+</div>
 
-                <article data-image="image2.png">
-                    <h3>Strategic Defenses: Weighing MDR Services Against In-House Cybersecurity Teams in a Complex
-                        Threat Landscape
-                    </h3>
-                    <p>
-                        In the evolving landscape of cybersecurity, a critical debate emerges
-                        between the effectiveness of Managed Detection and Response (MDR) services and dedicated
-                        in-house security personnel. </p>
-                    <div class="article-content"> MDR services, with their automated technologies and broad reach,
-                        promise comprehensive protection but often at the risk of introducing vulnerabilities into
-                        already fragile IT environments. The crux of the issue lies in the generic nature of MDR
-                        solutions, which may not align perfectly with a company's specific technological needs,
-                        potentially leading to security gaps.
+<div class="tabs">
+  <button class="tab active" data-tab="chat">Chat</button>
+  <button class="tab" data-tab="alerts" id="alerts-tab">Alerts<span class="badge" id="alert-badge" style="display:none">0</span></button>
+  <button class="tab" data-tab="control">Control</button>
+  <button class="tab" data-tab="recon">Recon</button>
+  <button class="tab" data-tab="map">Map</button>
+  <button class="tab" data-tab="rules">Rules</button>
+  <button class="tab" data-tab="files">Files</button>
+  <button class="tab" data-tab="terminal">Terminal</button>
+  <button class="tab" data-tab="packets">Packets</button>
+</div>
 
-                        Moreover, the centralized structure of MDR providers presents a significant risk—if compromised,
-                        a breach could extend across all the networks they serve. This starkly contrasts with in-house
-                        teams, who offer tailored, focused defenses solely dedicated to one company’s infrastructure.
-                        The deep integration and familiarity with the company's systems that in-house personnel provide
-                        cannot be understated, allowing for quicker and more effective responses to threats.
+<!-- Chat -->
+<div class="tab-content active" id="tab-chat">
+  <div class="ctx-buttons">
+    <button class="ctx-btn" id="ctx-traffic">Analyze Traffic</button>
+    <button class="ctx-btn" id="ctx-map">Network Map</button>
+    <button class="ctx-btn" id="ctx-conns">TCP Connections</button>
+    <button class="ctx-btn" id="ctx-arp">ARP Table</button>
+    <button class="ctx-btn" id="ctx-wifi">Analyze WiFi</button>
+    <button class="ctx-btn" id="ctx-ble">Analyze BLE</button>
+    <button class="ctx-btn" id="ctx-pcap-ai">Analyze PCAP File</button>
+  </div>
+  <div id="chat-messages">
+    <div class="msg system">eth0 AI console. Connect to COM port, configure API key, then chat or use context buttons.</div>
+  </div>
+</div>
 
-                        Investing in cybersecurity, whether through MDR or in-house, is essential. However, the nuanced
-                        understanding and control over security measures that an in-house team provides are often more
-                        appealing. They offer a consistent and intimate approach to handling a company's specific
-                        vulnerabilities, potentially making them more effective than the broad strokes applied by MDR
-                        services.
+<!-- Alerts SIEM -->
+<div class="tab-content" id="tab-alerts">
+  <div class="alert-toolbar">
+    <button id="alert-refresh">Refresh</button>
+    <button id="alert-auto">Live: Off</button>
+    <select id="alert-filter">
+      <option value="">All</option>
+      <option value="crit">CRIT only</option>
+      <option value="warn">WARN+</option>
+      <option value="unacked">Unacked</option>
+    </select>
+    <button id="alert-ack-all">Ack All</button>
+    <button id="alert-clear" style="color:var(--red)">Clear</button>
+    <button id="alert-ai">AI Triage</button>
+    <button id="alert-export">Export</button>
+    <span id="alert-info">0 alerts</span>
+  </div>
+  <div id="alert-list"></div>
+</div>
 
-                        Despite the apparent advantages of in-house teams, the challenge remains in the substantial
-                        investment required to develop these capabilities. This includes ongoing education, training,
-                        and adopting advanced tools like Security Information and Event Management (SIEM) systems. These
-                        systems, crucial for maintaining network health, can show through real-time feedback whether
-                        security measures are indeed effective.
-
-                        However, the journey towards robust cybersecurity doesn't end with technology. Human factors
-                        play a critical role. Regular training to recognize threats like spear-phishing and ensuring
-                        compliance with security policies are essential. These human-centric strategies complement the
-                        technological defenses, creating a comprehensive security posture.
-
-                        Ultimately, businesses must foster a proactive, security-minded culture and continuously adapt
-                        to the evolving cyber threat landscape. This holistic approach, emphasizing both human and
-                        technological factors, forms the cornerstone of effective cybersecurity practices. Through it,
-                        businesses can protect their digital assets and contribute to a safer internet environment for
-                        all.
-                        </p>
-                    </div>
-                    <a href="#" class="read-more-btn" data-article="2">Read More</a>
-                </article>
-
-
-                <article data-image="image3.webp">
-                    <h3>Exploring the xz Backdoor (CVE-2024-3094) with xzbot
-                    </h3>
-
-                    <p>The recent discovery of the xz backdoor, identified as CVE-2024-3094, has raised concerns in
-                        the
-                        cybersecurity community. To help researchers and enthusiasts better understand and analyze
-                        this
-                        vulnerability, the xzbot project has been created on GitHub.
-                    <div class="article-content">
-                        xzbot is an open-source repository that provides a comprehensive exploration of the xz
-                        backdoor.
-                        It offers a range of tools and resources to facilitate the study and detection of exploit
-                        attempts targeting this vulnerability.
-
-                        One of the key components of xzbot is the honeypot. It simulates a vulnerable server,
-                        allowing
-                        researchers to observe and capture attempts to exploit the xz backdoor in a controlled
-                        environment. By deploying this honeypot, organizations can gain valuable insights into the
-                        tactics and techniques used by attackers targeting this vulnerability.
-
-                        To enhance the security of the xz library, xzbot includes an ed448 patch. This patch
-                        modifies
-                        the liblzma.so library to utilize a custom ED448 public key. By applying this patch, users
-                        can
-                        mitigate the risk of unauthorized access through the backdoor.
-
-                        Understanding the format of the backdoor payload is crucial for effective analysis and
-                        detection. xzbot provides detailed documentation on the structure and composition of the
-                        backdoor payload. This information enables researchers to develop targeted detection
-                        mechanisms
-                        and signatures to identify and block malicious payloads.
-
-                        For those interested in demonstrating the impact of the xz backdoor, xzbot offers a
-                        command-line
-                        interface (CLI) tool. This tool allows users to trigger remote code execution (RCE) on a
-                        vulnerable system, assuming knowledge of the corresponding ED448 private key. While this
-                        feature
-                        is intended for educational and research purposes, it highlights the severity of the
-                        vulnerability and the importance of proper mitigation measures.
-
-                        The xzbot project serves as a valuable resource for the cybersecurity community, empowering
-                        researchers, developers, and security professionals to study and address the xz backdoor
-                        effectively. By collaborating and sharing knowledge through this open-source initiative, we
-                        can
-                        collectively enhance our understanding of this vulnerability and develop robust defenses
-                        against
-                        potential exploits.
-
-                        To get started with xzbot and contribute to the ongoing research efforts, visit the GitHub
-                        repository at [https://github.com/amlweems/xzbot](https://github.com/amlweems/xzbot).
-                        Together,
-                        let's work towards a more secure digital landscape by exploring and mitigating the risks
-                        posed
-                        by the xz backdoor.</p>
-                    </div>
-                <a href="#" class="read-more-btn" data-article="3">Read More</a>
-                </article>
-
-                <article data-image="image.png">
-                    <h3>Upcoming Projects: A Sneak Peek</h3>
-                    <p>We are developing several new ideas, from building a DIY 2G cell network to experimenting with AI-assisted penetration testing. We'll also share a toolkit for streamlined firmware analysis. Expect full posts on these soon!</p>
-                    <div class="article-content">
-                        <p>Our current research focuses on three main areas:</p>
-                        <ul>
-                            <li><strong>DIY 2G network:</strong> using open-source baseband software and low-cost hardware to better understand mobile security.</li>
-                            <li><strong>Firmware analysis toolkit:</strong> scripts to simplify unpacking and scanning firmware images across architectures.</li>
-                            <li><strong>AI-assisted pentesting:</strong> exploring large language models to automate reconnaissance and exploit development.</li>
-                        </ul>
-                        <p>These projects are in active development, and we'll publish detailed write-ups as they mature.</p>
-                    </div>
-                    <a href="#" class="read-more-btn" data-article="4">Read More</a>
-                </article>
-
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2023 Strategic Bytes. All rights reserved.</p>
-    </footer>
-
-    <!-- Contact Modal -->
-    <div id="contactModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Contact Me</h2>
-            <form id="contactForm" action="https://formspree.io/f/xbjnzapq" method="POST">
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message" required></textarea>
-                </div>
-                <button type="submit">Send Message</button>
-            </form>
-        </div>
+<!-- Control -->
+<div class="tab-content" id="tab-control">
+  <div class="controls">
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-box"><div class="val" id="s-pkts">-</div><div class="lbl">Captured</div></div>
+      <div class="stat-box"><div class="val" id="s-sent">-</div><div class="lbl">Sent</div></div>
+      <div class="stat-box"><div class="val" id="s-tcp">-</div><div class="lbl">TCP</div></div>
+      <div class="stat-box"><div class="val" id="s-udp">-</div><div class="lbl">UDP</div></div>
+      <div class="stat-box"><div class="val" id="s-arp">-</div><div class="lbl">ARP</div></div>
+      <div class="stat-box"><div class="val" id="s-icmp">-</div><div class="lbl">ICMP</div></div>
     </div>
-
-    <!-- Latest Bytes Modal -->
-    <div id="latestModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Text-Based Object Identification: A Lightweight Approach</h2>
-            <video width="640" height="200" controls>
-                <source src="vid1.webm" type="video/webm" class="article-image">
-            </video>
-            <p>Text-based object identification is an approach that leverages text recognition and machine learning
-                techniques to identify objects in images based on the associated text information. This method has
-                gained attention as a lightweight alternative to more complex computer vision techniques for object
-                recognition.
-                The concept of using text for object identification has been explored in various research papers and
-                projects. Shen et al. (2016) proposed a deep learning approach for text-based image retrieval,
-                utilizing
-                Convolutional Neural Networks (CNNs) to learn the mapping between text queries and image features
-                [1].
-                Barbu et al. (2014) presented a system for text-based object recognition in natural scenes,
-                combining
-                text detection, optical character recognition (OCR), and object recognition techniques [2].</p>
-            <p>Zhang et al. (2011) focused on retrieving objects in videos based on text queries, proposing a
-                framework
-                that integrates text detection, tracking, and recognition with object retrieval techniques [3].
-                Schuster
-                et al. (2015) introduced a method for text-based image retrieval using scene graphs, which capture
-                the
-                relationships between objects in an image and use natural language processing techniques to parse
-                text
-                queries [4].
-                While text-based object identification has shown promise in certain scenarios, it is important to
-                acknowledge its limitations compared to more advanced computer vision techniques. Deep
-                learning-based
-                approaches using CNNs have achieved state-of-the-art performance in object detection and recognition
-                tasks by directly learning visual features from images [5].</p>
-            <p>However, text-based object identification can still be a valuable technique in specific domains where
-                objects are commonly associated with text labels or captions, such as product recognition or
-                document
-                analysis. It can also serve as a complementary approach to enhance the performance of visual object
-                recognition systems.
-                In conclusion, text-based object identification offers a lightweight approach to object recognition
-                by
-                leveraging text information associated with images. While it may not match the performance of more
-                advanced computer vision techniques, it can be effective in certain scenarios and serve as a
-                complementary method to enhance object recognition systems.</p>
-            References:
-            <p>[1] X. Shen, Z. Lin, J. Brandt, and Y. Wu, "Text-Based Image Retrieval Using Deep Learning," arXiv
-                preprint arXiv:1612.07119, 2016.</p>
-            <p>[2] A. Barbu, C. Wotawa, and J. M. Siskind, "Text-Based Object Recognition in the Wild," in
-                Proceedings
-                of the IEEE Conference on Computer Vision and Pattern Recognition, 2014, pp. 3953-3960.</p>
-            <p>[3] Z. Zhang, L. Zhang, and M. Li, "Text-Based Object Retrieval in Videos," in Proceedings of the
-                IEEE
-                International Conference on Multimedia and Expo, 2011, pp. 1-6.</p>
-            <p>[4] S. Schuster, R. Krishna, A. Chang, L. Fei-Fei, and C. D. Manning, "Text-Based Image Retrieval
-                Using
-                Scene Graphs," in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition,
-                2015,
-                pp. 3945-3954.</p>
-            <p>[5] A. Krizhevsky, I. Sutskever, and G. E. Hinton, "ImageNet Classification with Deep Convolutional
-                Neural Networks," in Advances in Neural Information Processing Systems, 2012, pp. 1097-1105.</p>
-        </div>
+    <div class="ctrl-section"><h3>Capture</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="execCmd('capture start')">Start</button>
+        <button class="ctrl-btn" onclick="execCmd('capture stop')">Stop</button>
+      </div>
     </div>
-
-    <!-- Article Modals -->
-    <div id="articleModal1" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="articleTitle1"></h2>
-            <img id="articleImage1" src="" alt="Article Image" class="article-image">
-            <p id="articleContent1"></p>
-        </div>
+    <div class="ctrl-section"><h3>MitM (ARP Poison)</h3>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="mitm-ip" placeholder="Victim IP">
+        <button class="ctrl-btn" onclick="execCmd('mitm start '+$('mitm-ip').value.trim())">Start</button>
+        <button class="ctrl-btn danger" onclick="execCmd('mitm stop')">Stop</button>
+        <span class="cmd-toast" id="mitm-toast"></span>
+      </div>
     </div>
-
-    <div id="articleModal2" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="articleTitle2"></h2>
-            <img id="articleImage2" src="" alt="Article Image" class="article-image">
-            <p id="articleContent2"></p>
-        </div>
+    <div class="ctrl-section"><h3>DNS Spoof</h3>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="dns-ip" placeholder="Redirect IP">
+        <button class="ctrl-btn" onclick="execCmd('dnsspoof start '+$('dns-ip').value.trim())">Start All</button>
+        <button class="ctrl-btn danger" onclick="execCmd('dnsspoof stop')">Stop</button>
+        <span class="cmd-toast" id="dns-toast"></span>
+      </div>
     </div>
-
-    <div id="articleModal3" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="articleTitle3"></h2>
-            <img id="articleImage3" src="" alt="Article Image" class="article-image">
-            <p id="articleContent3"></p>
-        </div>
+    <div class="ctrl-section"><h3>Modules</h3>
+      <div class="ctrl-row"><label>IDS</label>
+        <button class="ctrl-btn" onclick="execCmd('ids on')">On</button>
+        <button class="ctrl-btn" onclick="execCmd('ids off')">Off</button></div>
+      <div class="ctrl-row"><label>Poison</label>
+        <button class="ctrl-btn" onclick="execCmd('poison on')">On</button>
+        <button class="ctrl-btn" onclick="execCmd('poison off')">Off</button></div>
+      <div class="ctrl-row"><label>DHCP Starve</label>
+        <button class="ctrl-btn" onclick="execCmd('dhcpstarve start')">Start</button>
+        <button class="ctrl-btn danger" onclick="execCmd('dhcpstarve stop')">Stop</button></div>
     </div>
-
-    <div id="articleModal4" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="articleTitle4"></h2>
-            <img id="articleImage4" src="" alt="Article Image" class="article-image">
-            <p id="articleContent4"></p>
-        </div>
+    <div class="ctrl-section"><h3>Wireless</h3>
+      <div class="ctrl-row"><label>WiFi</label>
+        <button class="ctrl-btn" onclick="execCmd('wifi scan')">Scan</button>
+        <button class="ctrl-btn" onclick="execCmd('wifi auto 30')">Auto 30s</button>
+        <button class="ctrl-btn" onclick="execCmd('wifi auto off')">Auto Off</button></div>
+      <div class="ctrl-row"><label>BLE</label>
+        <button class="ctrl-btn" onclick="execCmd('ble scan')">Scan 5s</button>
+        <button class="ctrl-btn" onclick="execCmd('ble scan 10')">Scan 10s</button></div>
     </div>
+    <div class="ctrl-section"><h3>WIDS (Wireless Attack Detector)</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="execCmd('wids start 60')">Start (60s learn)</button>
+        <button class="ctrl-btn" onclick="execCmd('wids start 30')">Quick (30s)</button>
+        <button class="ctrl-btn danger" onclick="execCmd('wids stop')">Stop</button>
+        <button class="ctrl-btn" onclick="execCmd('wids clear')">Clear</button>
+      </div>
+      <div class="ctrl-row" style="font-size:11px;color:var(--dim)">
+        <span id="wids-info">Disabled</span>
+      </div>
+      <div class="ctrl-row" style="flex-wrap:wrap;gap:4px;margin-top:6px">
+        <label style="font-size:10px;color:var(--dim);width:100%">Detection Modules:</label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-evilTwin" checked onchange="widsSetDet('evilTwin',this.checked)"><span>Evil Twin</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-channelHop" checked onchange="widsSetDet('channelHop',this.checked)"><span>Channel Hop</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-encDown" checked onchange="widsSetDet('encDown',this.checked)"><span>Enc Downgrade</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-newNet" checked onchange="widsSetDet('newNet',this.checked)"><span>New Networks</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-flood" checked onchange="widsSetDet('flood',this.checked)"><span>Flood</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-jamming" checked onchange="widsSetDet('jamming',this.checked)"><span>Jamming</span></label>
+        <label class="wids-toggle"><input type="checkbox" id="wids-det-trackers" checked onchange="widsSetDet('trackers',this.checked)"><span>BLE Trackers</span></label>
+      </div>
+      <div class="ctrl-row" style="gap:6px;margin-top:4px">
+        <label style="font-size:10px;color:var(--dim)">Miss thresh:</label>
+        <input type="number" id="wids-missThresh" value="3" min="1" max="20" style="width:40px" onchange="widsSetDet('missThresh',this.value)">
+        <label style="font-size:10px;color:var(--dim)">Flood thresh:</label>
+        <input type="number" id="wids-floodThresh" value="8" min="2" max="50" style="width:40px" onchange="widsSetDet('floodThresh',this.value)">
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Recon</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="execCmd('recon sweep')">ARP Sweep</button>
+        <input class="ctrl-input" id="kill-ip" placeholder="Target IP">
+        <button class="ctrl-btn danger" onclick="execCmd('kill '+$('kill-ip').value.trim())">Kill Conns</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script src="script.js"></script>
+<!-- Recon -->
+<div class="tab-content" id="tab-recon">
+  <div style="display:flex;flex-direction:column;gap:8px;padding:12px;height:100%;overflow-y:auto">
+    <div class="ctrl-section"><h3>Network Discovery</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="reconRun('recon sweep')">ARP Sweep</button>
+        <button class="ctrl-btn" onclick="reconRun('recon mdns')">mDNS/NBNS</button>
+        <button class="ctrl-btn" onclick="reconRun('recon lldp')">LLDP/CDP</button>
+        <button class="ctrl-btn" onclick="reconRun('recon fingerprint')">OS Fingerprint</button>
+        <button class="ctrl-btn" onclick="reconRun('recon vlan')">VLAN Discovery</button>
+        <button class="ctrl-btn" onclick="reconRun('recon stp')">STP Topology</button>
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Port Scan / Service Scan</h3>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="recon-target" placeholder="Target IP">
+        <input class="ctrl-input" id="recon-ports" placeholder="Ports (e.g. 22,80,443)" style="width:160px">
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="reconPortScan()">SYN Scan</button>
+        <button class="ctrl-btn" onclick="reconServiceScan()">Service Scan</button>
+        <button class="ctrl-btn" onclick="reconRunTarget('recon netbios ')">NBSTAT Query</button>
+        <button class="ctrl-btn" onclick="reconRunTarget('kasa ')">Kasa Query</button>
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Wireless</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="reconRun('wifi scan')">WiFi Scan</button>
+        <button class="ctrl-btn" onclick="reconRun('wifi list')">WiFi List</button>
+        <button class="ctrl-btn" onclick="reconRun('ble scan')">BLE Scan (5s)</button>
+        <button class="ctrl-btn" onclick="reconRun('ble list')">BLE List</button>
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Network Map / Info</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="reconRun('map')">Network Map</button>
+        <button class="ctrl-btn" onclick="reconRun('stats')">Packet Stats</button>
+        <button class="ctrl-btn" onclick="reconRun('ids stats')">IDS Stats</button>
+        <button class="ctrl-btn" onclick="reconRun('ids arp')">ARP Table</button>
+        <button class="ctrl-btn" onclick="reconRun('kill list')">TCP Connections</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Map -->
+<div class="tab-content" id="tab-map">
+  <div class="map-toolbar">
+    <button id="map-refresh">Refresh</button>
+    <button id="map-auto">Live: Off</button>
+    <button id="map-sweep">ARP Sweep First</button>
+    <button id="map-reset-view">Reset View</button>
+    <span id="map-info">Connect to device and run ARP sweep to discover hosts</span>
+  </div>
+  <div id="map-container"><div id="map-viewport"><div id="map-mermaid"></div></div></div>
+</div>
+
+<!-- Rules -->
+<div class="tab-content" id="tab-rules">
+  <div class="rules-toolbar">
+    <button id="rules-refresh">Refresh</button>
+    <button id="rules-export">Export JSON</button>
+    <button id="rules-import-btn">Import JSON</button>
+    <input type="file" id="rules-import-input" accept=".json">
+    <button id="rules-save">Save to SD</button>
+    <button id="rules-load">Load from SD</button>
+    <button id="rules-clear" style="color:var(--red)">Clear All</button>
+    <span style="color:var(--dim);font-size:10px" id="rules-count">0 rules</span>
+  </div>
+  <div class="rules-list" id="rules-list"></div>
+  <div class="rules-add">
+    <input id="rule-name" placeholder="name" style="width:90px">
+    <select id="rule-type">
+      <option value="src-ip">src-ip</option><option value="dst-ip">dst-ip</option>
+      <option value="src-port">src-port</option><option value="dst-port">dst-port</option>
+      <option value="proto">proto</option><option value="payload">payload (hex)</option>
+      <option value="src-mac">src-mac</option><option value="dst-mac">dst-mac</option>
+      <option value="ethertype">ethertype</option><option value="arp-op">arp-op</option>
+    </select>
+    <input id="rule-value" placeholder="value (IP/port/hex/mac)" style="width:140px">
+    <select id="rule-level">
+      <option value="warn">warn</option><option value="info">info</option><option value="crit">crit</option>
+    </select>
+    <input id="rule-thresh" placeholder="thresh" title="Alert after N hits (0=every)" style="width:50px" type="number" min="0" value="0">
+    <input id="rule-window" placeholder="win" title="Window (seconds)" style="width:40px" type="number" min="1" value="10">
+    <button id="rules-add-btn">Add Rule</button>
+  </div>
+</div>
+
+<!-- Files -->
+<div class="tab-content" id="tab-files">
+  <div style="display:flex;flex-direction:column;height:100%">
+    <div class="alert-toolbar">
+      <button id="files-refresh" onclick="refreshFiles()">Refresh</button>
+      <span id="files-info" style="color:var(--dim);font-size:11px">SD Card Files</span>
+      <span id="files-editing" style="color:var(--accent);font-size:11px;display:none"></span>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div id="files-list" style="width:220px;border-right:1px solid var(--border);overflow-y:auto;padding:4px"></div>
+      <div style="flex:1;display:flex;flex-direction:column">
+        <div id="files-editor-toolbar" style="padding:4px 8px;border-bottom:1px solid var(--border);display:none;gap:6px;align-items:center">
+          <button class="ctrl-btn" onclick="fileSave()">Save</button>
+          <button class="ctrl-btn danger" onclick="fileDelete()">Delete</button>
+          <button class="ctrl-btn" onclick="fileReload()">Reload</button>
+          <span id="files-path" style="color:var(--dim);font-size:10px"></span>
+        </div>
+        <textarea id="files-editor" style="flex:1;background:var(--bg);color:var(--text);border:none;padding:8px;font-family:'Courier New',monospace;font-size:12px;resize:none;outline:none" placeholder="Select a file to view/edit..." readonly></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Terminal -->
+<div class="tab-content" id="tab-terminal">
+  <div id="term-output"></div>
+  <div id="term-input-row">
+    <input id="term-cmd" placeholder="Serial command..." autocomplete="off">
+  </div>
+</div>
+
+<!-- Packets -->
+<div class="tab-content" id="tab-packets">
+  <div class="pkt-toolbar">
+    <button id="pkt-refresh">Refresh</button>
+    <button id="pkt-auto">Auto: Off</button>
+    <button id="pkt-send-ai">Send to AI</button>
+    <select id="pkt-filter"><option value="">All</option><option value="6">TCP</option>
+      <option value="17">UDP</option><option value="1">ICMP</option><option value="arp">ARP</option></select>
+    <span style="color:var(--dim);font-size:10px" id="pkt-count">0 packets</span>
+  </div>
+  <div id="pkt-list">
+    <table><thead><tr><th>Time</th><th>Proto</th><th>Info</th><th>Len</th></tr></thead>
+    <tbody id="pkt-body"></tbody></table>
+  </div>
+</div>
+
+<!-- Node context menu (fixed position, shown on map node click) -->
+<div id="node-menu">
+  <div class="nm-header" id="nm-ip"></div>
+  <div class="nm-sub" id="nm-detail"></div>
+  <button onclick="nodeAction('portscan')">Port Scan (SYN)</button>
+  <button onclick="nodeAction('servicescan')">Service Scan + Banners</button>
+  <button onclick="nodeAction('nbstat')">NetBIOS Query</button>
+  <hr>
+  <button onclick="nodeAction('mitm')">MitM (ARP Poison)</button>
+  <button onclick="nodeAction('kill')" class="danger">Kill All Connections</button>
+  <hr>
+  <button onclick="nodeAction('addRule')">Add IDS Rule</button>
+  <button onclick="nodeAction('copyip')">Copy IP</button>
+  <button onclick="nodeAction('askAI')">Ask AI About Host</button>
+</div>
+
+<!-- Input -->
+<div id="input-area">
+  <textarea id="user-input" rows="1" placeholder="Ask AI about your network..."></textarea>
+  <input type="file" id="pcap-input" accept=".pcap,.pcapng,.cap">
+  <button class="input-btn" id="pcap-btn" title="Upload PCAP">pcap</button>
+  <button id="send-btn">Send</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// ══════════════════════════════════════
+//  Web Serial
+// ══════════════════════════════════════
+let port=null, reader=null, writer=null, readLoop=null;
+let serialConnected=false;
+let lineBuf='';
+let pendingByType={};  // type -> {resolve, timer}  for typed queries
+let execQueue=[];      // FIFO for exec commands (can't distinguish by shape)
+
+async function serialConnect(){
+  if(serialConnected){serialDisconnect();return;}
+  try{
+    port=await navigator.serial.requestPort();
+    await port.open({baudRate:460800});
+    writer=port.writable.getWriter();
+    serialConnected=true;
+    $('connect-btn').textContent='Disconnect';
+    $('connect-btn').classList.add('connected');
+    $('d-serial').className='dot on';
+    $('serial-label').textContent='Connected';
+    termLog('--- Connected ---','term-cmd');
+    readSerialLoop();
+    // start polling status
+    statusTimer=setInterval(pollStatus,3000);
+    pollStatus();
+    widsSyncSettings();
+  }catch(e){
+    termLog('Connection failed: '+e.message,'term-alert');
+  }
+}
+
+async function serialDisconnect(){
+  serialConnected=false;
+  if(statusTimer){clearInterval(statusTimer);statusTimer=null;}
+  // Cancel all pending queries
+  for(const k in pendingByType){clearTimeout(pendingByType[k].timer);pendingByType[k].resolve(null);}
+  pendingByType={};
+  execQueue.forEach(h=>{clearTimeout(h.timer);h.resolve(null);});
+  execQueue=[];
+  try{if(reader){await reader.cancel();reader.releaseLock();reader=null;}}catch(e){}
+  try{if(writer){writer.releaseLock();writer=null;}}catch(e){}
+  try{if(port){await port.close();port=null;}}catch(e){}
+  $('connect-btn').textContent='Connect';
+  $('connect-btn').classList.remove('connected');
+  $('d-serial').className='dot off';
+  $('serial-label').textContent='Disconnected';
+  termLog('--- Disconnected ---','term-cmd');
+}
+
+async function readSerialLoop(){
+  const dec=new TextDecoder();
+  reader=port.readable.getReader();
+  try{
+    while(true){
+      const{value,done}=await reader.read();
+      if(done)break;
+      const text=dec.decode(value);
+      lineBuf+=text;
+      let lines=lineBuf.split('\n');
+      lineBuf=lines.pop(); // keep incomplete line
+      for(const line of lines){
+        const trimmed=line.replace(/\r$/,'');
+        if(trimmed.startsWith('@D:')){ hexStreamBuf.push(trimmed.slice(3)); continue; }
+        if(trimmed.startsWith('@HSTART:')){ hexStreamStart(trimmed); continue; }
+        if(trimmed.startsWith('@HEND:')){ hexStreamEnd(trimmed); continue; }
+        if(trimmed.startsWith('@')){
+          // Machine-readable JSON line — route by response shape
+          const json=trimmed.slice(1);
+          try{
+            const parsed=JSON.parse(json);
+            const rtype=detectResponseType(parsed);
+            if(rtype==='exec'&&execQueue.length>0){
+              // Exec responses always go to exec FIFO
+              const h=execQueue.shift();
+              clearTimeout(h.timer);
+              h.resolve(parsed);
+            }else if(rtype&&rtype!=='exec'&&pendingByType[rtype]){
+              // Typed response — dispatch to matching handler
+              clearTimeout(pendingByType[rtype].timer);
+              pendingByType[rtype].resolve(parsed);
+              delete pendingByType[rtype];
+            }else if(execQueue.length>0){
+              // Unknown — try exec FIFO as last resort
+              const h=execQueue.shift();
+              clearTimeout(h.timer);
+              h.resolve(parsed);
+            }
+          }catch(e){
+            if(execQueue.length>0){const h=execQueue.shift();clearTimeout(h.timer);h.resolve(null);}
+          }
+        }else if(trimmed){
+          termLog(trimmed);
+        }
+      }
+    }
+  }catch(e){
+    if(serialConnected)termLog('Read error: '+e.message,'term-alert');
+  }finally{
+    try{reader.releaseLock();}catch(e){}
+    reader=null;
+  }
+}
+
+async function serialSend(cmd){
+  if(!writer)return;
+  const enc=new TextEncoder();
+  await writer.write(enc.encode(cmd+'\n'));
+}
+
+// Detect response type from JSON shape
+function detectResponseType(j){
+  if(!j)return null;
+  if(j.ok!==undefined)return 'exec';          // exec response {ok:bool, msg:str}
+  if(j.ip&&j.mac)return 'status';
+  if(Array.isArray(j.alerts))return 'alerts';
+  if(Array.isArray(j.files))return 'files';
+  if(j.self)return 'map';
+  if(Array.isArray(j.baseline))return 'wids';
+  if(Array.isArray(j)){
+    if(j.length>0){
+      if(j[0].name&&j[0].type)return 'rules';
+      if(j[0].info!==undefined)return 'packets';
+      if(j[0].age!==undefined)return 'arp';
+      if(j[0].src)return 'conns';
+    }
+    // Empty or unrecognized array — find first pending array-type handler
+    for(const t of ['rules','packets','arp','conns','array']){
+      if(pendingByType[t])return t;
+    }
+    return 'array';
+  }
+  return null;
+}
+
+// Map commands to expected response types
+const cmdTypeMap={
+  'web json':'status','web alerts':'alerts','web map':'map','web files':'files',
+  'web wids':'wids','web rules':'rules','web packets':'packets',
+  'web arp':'arp','web conns':'conns','web wifi':'array','web ble':'array'
+};
+
+// Send command and wait for @JSON response
+function serialQuery(cmd,timeoutMs=5000){
+  const rtype=cmdTypeMap[cmd];
+  if(rtype){
+    // Typed query — cancel any existing query of this type
+    return new Promise(resolve=>{
+      if(pendingByType[rtype]){
+        clearTimeout(pendingByType[rtype].timer);
+        pendingByType[rtype].resolve(null);
+      }
+      const timer=setTimeout(()=>{delete pendingByType[rtype];resolve(null);},timeoutMs);
+      pendingByType[rtype]={resolve,timer};
+      serialSend(cmd);
+    });
+  }
+  // Exec / unknown — use FIFO queue
+  return new Promise(resolve=>{
+    const timer=setTimeout(()=>{
+      const idx=execQueue.findIndex(h=>h.resolve===resolve);
+      if(idx>=0)execQueue.splice(idx,1);
+      resolve(null);
+    },timeoutMs);
+    execQueue.push({resolve,timer});
+    serialSend(cmd);
+  });
+}
+
+// ══════════════════════════════════════
+//  Terminal
+// ══════════════════════════════════════
+function termLog(text,cls){
+  const el=$('term-output');
+  const span=document.createElement('span');
+  if(cls)span.className=cls;
+  span.textContent=text+'\n';
+  el.appendChild(span);
+  // Keep last 500 lines
+  while(el.childNodes.length>500)el.removeChild(el.firstChild);
+  el.scrollTop=el.scrollHeight;
+}
+
+// ══════════════════════════════════════
+//  Device Polling
+// ══════════════════════════════════════
+let statusTimer=null;
+let deviceStatus={};
+
+async function pollStatus(){
+  if(!serialConnected)return;
+  const s=await serialQuery('web json');
+  if(!s||!s.ip)return;  // ignore wrong response type
+  deviceStatus=s;
+  $('d-cap').className='dot '+(s.capturing?'on':'off');
+  $('d-ids').className='dot '+(s.ids?'on':'off');
+  $('d-mitm').className='dot '+(s.mitm?'warn':'off');
+  $('d-dns').className='dot '+(s.dnsspoof?'warn':'off');
+  // Alert badge from status poll
+  const unacked=s.alertUnacked||0;
+  const abadge=$('alert-badge');
+  if(unacked>0){abadge.textContent=unacked;abadge.style.display='inline';}else abadge.style.display='none';
+  $('d-wids').className='dot '+(s.widsLearning?'warn':s.wids?'on':'off');
+  $('d-wifi').className='dot '+(s.wifiScanning?'warn':s.wifiCount>0?'on':'off');
+  // WIDS info
+  if(s.wids){
+    let wi='WIDS: '+(s.widsLearning?'Learning...':'Monitoring')+' | '+s.widsAlerts+' alerts';
+    $('wids-info').textContent=wi;
+    $('wids-info').style.color=s.widsAlerts>0?'var(--red)':'var(--accent)';
+  }else{$('wids-info').textContent='Disabled';$('wids-info').style.color='var(--dim)';}
+  $('d-ble').className='dot '+(s.bleScanning?'warn':s.bleCount>0?'on':'off');
+  $('wifi-count').textContent=s.wifiCount||0;
+  $('ble-count').textContent=s.bleCount||0;
+  $('ip-display').textContent=s.ip||'';
+  $('s-pkts').textContent=s.packets??'-';
+  $('s-sent').textContent=s.sent??'-';
+  $('s-tcp').textContent=s.tcp??'-';
+  $('s-udp').textContent=s.udp??'-';
+  $('s-arp').textContent=s.arp??'-';
+  $('s-icmp').textContent=s.icmp??'-';
+}
+
+// ══════════════════════════════════════
+//  Command Execution
+// ══════════════════════════════════════
+async function execCmd(cmd){
+  if(!serialConnected){addMsg('error','Not connected to serial port.');return;}
+  if(!cmd||!cmd.trim())return;
+  const r=await serialQuery('web exec '+cmd);
+  if(r){
+    termLog((r.ok?'[OK] ':'[ERR] ')+(r.msg||'done'), r.ok?'term-cmd':'term-alert');
+  }
+  pollStatus();
+}
+
+// ══════════════════════════════════════
+//  Packets
+// ══════════════════════════════════════
+let lastPackets=[];
+let pktAutoTimer=null;
+
+async function refreshPackets(){
+  if(!serialConnected)return;
+  const pkts=await serialQuery('web packets');
+  if(!pkts||!Array.isArray(pkts))return;  // ignore wrong response type
+  lastPackets=pkts;
+  renderPackets(pkts);
+}
+
+function renderPackets(pkts){
+  const filter=$('pkt-filter').value;
+  const filtered=pkts.filter(p=>{
+    if(!filter)return true;
+    if(filter==='arp')return p.et===0x0806;
+    return p.proto===parseInt(filter);
+  });
+  $('pkt-count').textContent=filtered.length+' packets';
+  const tbody=$('pkt-body');tbody.innerHTML='';
+  filtered.forEach(p=>{
+    const tr=document.createElement('tr');
+    const proto=p.et===0x0806?'ARP':p.proto===6?'TCP':p.proto===17?'UDP':p.proto===1?'ICMP':'?';
+    const cls=p.et===0x0806?'proto-arp':p.proto===6?'proto-tcp':p.proto===17?'proto-udp':
+      p.proto===1?'proto-icmp':'proto-other';
+    tr.innerHTML='<td>'+(p.t/1000).toFixed(1)+'s</td><td class="'+cls+'">'+proto+'</td><td>'+esc(p.info)+'</td><td>'+p.len+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+function esc(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+
+// ══════════════════════════════════════
+//  AI Chat
+// ══════════════════════════════════════
+const PROVIDERS={
+  anthropic:{
+    models:[{id:'claude-sonnet-4-6',name:'Sonnet 4.6'},{id:'claude-opus-4-6',name:'Opus 4.6'},
+      {id:'claude-haiku-4-5-20251001',name:'Haiku 4.5'}],
+    endpoint:'https://api.anthropic.com/v1/messages',
+    buildReq(key,model,msgs,sys,mt){
+      const body={model,messages:msgs.map(m=>({role:m.role,content:m.content})),max_tokens:mt,stream:true};
+      if(sys)body.system=sys;
+      return{url:this.endpoint,init:{method:'POST',headers:{'Content-Type':'application/json',
+        'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify(body)}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          const x=l.slice(6);if(x==='[DONE]')return;try{const j=JSON.parse(x);
+            if(j.type==='content_block_delta'&&j.delta?.text)yield j.delta.text;
+            if(j.type==='message_stop')return;}catch(e){}}}}
+  },
+  openai:{
+    models:[{id:'gpt-4o',name:'GPT-4o'},{id:'gpt-4o-mini',name:'GPT-4o Mini'},
+      {id:'o3',name:'o3'},{id:'o4-mini',name:'o4-mini'},
+      {id:'gpt-4.1',name:'GPT-4.1'},{id:'gpt-4.1-mini',name:'GPT-4.1 Mini'}],
+    endpoint:'https://api.openai.com/v1/chat/completions',
+    buildReq(key,model,msgs,sys,mt){
+      const m=[];if(sys)m.push({role:'system',content:sys});
+      m.push(...msgs.map(x=>({role:x.role,content:x.content})));
+      return{url:this.endpoint,init:{method:'POST',headers:{'Content-Type':'application/json',
+        'Authorization':'Bearer '+key},body:JSON.stringify({model,messages:m,max_tokens:mt,stream:true})}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          const x=l.slice(6);if(x==='[DONE]')return;try{const j=JSON.parse(x);
+            const t=j.choices?.[0]?.delta?.content;if(t)yield t;}catch(e){}}}}
+  },
+  gemini:{
+    models:[{id:'gemini-2.5-flash',name:'Gemini 2.5 Flash'},{id:'gemini-2.5-pro',name:'Gemini 2.5 Pro'},
+      {id:'gemini-2.0-flash',name:'Gemini 2.0 Flash'}],
+    endpoint:'https://generativelanguage.googleapis.com/v1beta/models/',
+    buildReq(key,model,msgs,sys,mt){
+      const contents=msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+      const body={contents,generationConfig:{maxOutputTokens:mt}};
+      if(sys)body.systemInstruction={parts:[{text:sys}]};
+      return{url:this.endpoint+model+':streamGenerateContent?alt=sse&key='+key,
+        init:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          try{const j=JSON.parse(l.slice(6));const t=j.candidates?.[0]?.content?.parts?.[0]?.text;
+            if(t)yield t;}catch(e){}}}}
+  }
+};
+
+let history=[], streaming=false, abortCtl=null, parsedPcap=null;
+
+function addMsg(role,content,extra){
+  const div=document.createElement('div');div.className='msg '+role;
+  if(role==='assistant'&&extra?.model){const t=document.createElement('div');t.className='tag';t.textContent=extra.model;div.appendChild(t);}
+  const span=document.createElement('span');span.className='msg-text';span.textContent=content;
+  div.appendChild(span);$('chat-messages').appendChild(div);$('chat-messages').scrollTop=$('chat-messages').scrollHeight;
+  return div;
+}
+
+function renderMd(t){
+  // Escape HTML first
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Fenced code blocks (``` ... ```)
+  t=t.replace(/```(\w*)\n([\s\S]*?)```/g,(m,lang,code)=>'<pre><code>'+code+'</code></pre>');
+  // Inline code
+  t=t.replace(/`([^`]+)`/g,'<code>$1</code>');
+  // Bold: **text** or __text__
+  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  // Italic: *text* or _text_ (but not inside words for _)
+  t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  t=t.replace(/(?<!\w)_(.+?)_(?!\w)/g,'<em>$1</em>');
+  // Strikethrough: ~~text~~
+  t=t.replace(/~~(.+?)~~/g,'<del>$1</del>');
+  // Headers: # through ####
+  t=t.replace(/^#### (.+)$/gm,'<h4>$1</h4>');
+  t=t.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  t=t.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  t=t.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  // Horizontal rule
+  t=t.replace(/^---+$/gm,'<hr>');
+  // Blockquote
+  t=t.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  // Unordered list items: - or *
+  t=t.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+  // Ordered list items: 1. 2. etc
+  t=t.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  // Wrap consecutive <li> in <ul> (simple heuristic)
+  t=t.replace(/((?:<li>.*<\/li>\n?)+)/g,'<ul>$1</ul>');
+  // Links: [text](url)
+  t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Tables: detect lines with | pipes |
+  t=t.replace(/((?:^\|.+\|$\n?)+)/gm, function(block){
+    const rows=block.trim().split('\n').filter(r=>r.trim());
+    if(rows.length<2)return block;
+    // Check for separator row (|---|---|)
+    let sepIdx=-1;
+    for(let i=0;i<rows.length;i++){if(/^\|[\s\-:|]+\|$/.test(rows[i])){sepIdx=i;break;}}
+    let html='<table>';
+    for(let i=0;i<rows.length;i++){
+      if(i===sepIdx)continue; // skip separator
+      const cells=rows[i].split('|').filter((c,j,a)=>j>0&&j<a.length-1).map(c=>c.trim());
+      const tag=(sepIdx>0&&i<sepIdx)?'th':'td';
+      html+='<tr>'+cells.map(c=>'<'+tag+'>'+c+'</'+tag+'>').join('')+'</tr>';
+    }
+    html+='</table>';
+    return html;
+  });
+  // Line breaks: double newline = paragraph break
+  t=t.replace(/\n\n/g,'</p><p>');
+  return t;
+}
+
+async function sendMessage(extraContext){
+  const text=$('user-input').value.trim();
+  if((!text&&!extraContext)||streaming)return;
+  const key=$('api-key').value.trim();
+  if(!key){addMsg('error','Set API key in settings.');$('settings').classList.add('open');return;}
+  const provider=PROVIDERS[$('provider').value], model=$('model').value;
+
+  let fullMsg='';
+  if(extraContext){
+    fullMsg='[eth0 Device Data]\n'+extraContext+'\n\n';
+    fullMsg+=text?'[User]\n'+text:'Analyze the above data. Report anomalies, security concerns, or notable patterns.';
+  }else fullMsg=text;
+
+  addMsg('user',text||'(analyze device data)');
+  history.push({role:'user',content:fullMsg});
+  $('user-input').value='';autoResize();
+
+  const aiDiv=addMsg('assistant','',{model});
+  const span=aiDiv.querySelector('.msg-text');
+  span.className='msg-text typing';span.textContent='Thinking';
+  streaming=true;$('send-btn').textContent='Stop';
+  abortCtl=new AbortController();
+
+  try{
+    const sys=$('system-prompt').value.trim()||
+      'You are eth0, an AI security analyst embedded in an ESP32-S3 network security tool. You analyze network traffic, PCAP data, ARP tables, and TCP connections. Be concise and technical.';
+    const mt=parseInt($('max-tokens').value)||4096;
+    const req=provider.buildReq(key,model,history,sys,mt);
+    req.init.signal=abortCtl.signal;
+    const response=await fetch(req.url,req.init);
+    if(!response.ok){const e=await response.text();let m;try{m=JSON.parse(e).error?.message||e}catch(_){m=e}throw new Error(m);}
+    span.className='msg-text';span.textContent='';
+    let full='';
+    for await(const chunk of provider.parseStream(response)){
+      full+=chunk;span.innerHTML=renderMd(full);$('chat-messages').scrollTop=$('chat-messages').scrollHeight;
+    }
+    history.push({role:'assistant',content:full});
+  }catch(e){
+    if(e.name==='AbortError'){span.className='msg-text';
+      if(span.textContent&&span.textContent!=='Thinking')history.push({role:'assistant',content:span.textContent});
+      else span.textContent='[stopped]';
+    }else{span.className='msg-text';aiDiv.className='msg error';span.textContent='Error: '+e.message;}
+  }finally{streaming=false;abortCtl=null;$('send-btn').textContent='Send';}
+}
+
+// ══════════════════════════════════════
+//  IDS Rules Management
+// ══════════════════════════════════════
+let currentRules=[];
+
+async function refreshRules(){
+  if(!serialConnected)return;
+  const r=await serialQuery('web rules');
+  if(!r||!Array.isArray(r))return;  // ignore wrong response type
+  currentRules=r;
+  renderRules(r);
+}
+
+function renderRules(rules){
+  const el=$('rules-list');el.innerHTML='';
+  $('rules-count').textContent=rules.length+'/32 rules';
+  if(!rules.length){el.innerHTML='<div style="color:var(--dim);padding:20px;text-align:center">No custom rules. Add one below.</div>';return;}
+  rules.forEach((r,i)=>{
+    const div=document.createElement('div');
+    div.className='rule-item'+(r.enabled?'':' disabled');
+    const val=r.ip||r.port||r.proto||r.payload||r.mac||r.ethertype||r.arp_op||'';
+    const threshStr=r.threshold>0?' ('+r.threshold+'/'+r.window+'s)':'';
+    const idx=r.idx!=null?r.idx:i;
+    div.innerHTML=
+      '<span class="r-name">'+esc(r.name)+'</span>'+
+      '<span class="r-type">'+esc(r.type)+'</span>'+
+      '<span class="r-val">'+esc(String(val))+'</span>'+
+      '<span class="r-lvl '+r.level+'">'+r.level+threshStr+'</span>'+
+      '<span class="r-hits">'+r.hits+' hits</span>'+
+      '<span class="r-actions">'+
+        '<button onclick="viewRuleAlerts(\''+esc(r.name)+'\')">alerts</button>'+
+        '<button onclick="toggleRule('+idx+','+(!r.enabled)+')">'+(r.enabled?'disable':'enable')+'</button>'+
+        '<button class="del" onclick="removeRule('+idx+')">del</button>'+
+      '</span>';
+    el.appendChild(div);
+  });
+}
+
+async function toggleRule(idx,enable){
+  await serialQuery('web exec ids rule '+(enable?'enable ':'disable ')+idx);
+  refreshRules();
+}
+async function removeRule(idx){
+  await serialQuery('web exec ids rule remove '+idx);
+  refreshRules();
+}
+async function addRule(){
+  const name=$('rule-name').value.trim();
+  const type=$('rule-type').value;
+  const value=$('rule-value').value.trim();
+  const level=$('rule-level').value;
+  const thresh=parseInt($('rule-thresh').value)||0;
+  const win=parseInt($('rule-window').value)||10;
+  if(!name||!value){return;}
+  let cmd='ids rule add '+name+' '+type+' '+value+' '+level;
+  if(thresh>0) cmd+=' threshold '+thresh+' '+win;
+  const r=await serialQuery('web exec '+cmd);
+  if(r)termLog(r.ok?'[OK] '+(r.msg||'done'):'[ERR] '+(r.error||r.msg||'unknown'), r.ok?'term-cmd':'term-alert');
+  $('rule-name').value='';$('rule-value').value='';
+  refreshRules();
+}
+
+function exportRules(){
+  if(!currentRules.length)return;
+  const blob=new Blob([JSON.stringify(currentRules,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='ids_rules.json';a.click();URL.revokeObjectURL(a.href);
+}
+
+async function importRules(file){
+  const text=await file.text();
+  let rules;
+  try{rules=JSON.parse(text);}catch(e){addMsg('error','Invalid JSON file.');return;}
+  if(!Array.isArray(rules)){addMsg('error','Expected JSON array of rules.');return;}
+  // Clear existing then add each
+  await serialQuery('web exec ids rule clear');
+  let ok=0;
+  for(const r of rules){
+    const val=r.ip||r.port||r.proto||r.payload||r.mac||'';
+    if(!r.name||!r.type||!val)continue;
+    const cmd='ids rule add '+r.name+' '+r.type+' '+val+' '+(r.level||'warn');
+    await serialQuery('web exec '+cmd);
+    ok++;
+    // If rule was disabled, disable it
+    if(r.enabled===false){
+      // Find its index (it'll be the last active slot)
+      await serialQuery('web rules');  // refresh to get index... skip for now
+    }
+  }
+  termLog('Imported '+ok+' rules','term-cmd');
+  refreshRules();
+}
+
+// ══════════════════════════════════════
+//  Alerts SIEM
+// ══════════════════════════════════════
+let alertAutoTimer=null;
+let lastAlerts=[];
+
+async function refreshAlerts(){
+  if(!serialConnected)return;
+  const data=await serialQuery('web alerts');
+  if(!data||!Array.isArray(data.alerts))return;  // ignore wrong response type
+  lastAlerts=data.alerts;
+  renderAlerts(lastAlerts);
+  // Update badge
+  const un=data.unacked||0;
+  const badge=$('alert-badge');
+  if(un>0){badge.textContent=un;badge.style.display='inline';}
+  else badge.style.display='none';
+  $('alert-info').textContent=data.total+' total, '+un+' unacked';
+}
+
+function renderAlerts(alerts){
+  const filter=$('alert-filter').value;
+  let filtered=alerts;
+  if(filter==='crit') filtered=alerts.filter(a=>a.lvl==='crit');
+  else if(filter==='warn') filtered=alerts.filter(a=>a.lvl==='crit'||a.lvl==='warn');
+  else if(filter==='unacked') filtered=alerts.filter(a=>!a.ack);
+
+  // Group by normalized message — stack similar alerts
+  const groups=[];
+  const groupMap={};
+  for(let i=filtered.length-1;i>=0;i--){
+    const a=filtered[i];
+    // Normalize: strip hit counts, port numbers after IPs, and trailing stats
+    const norm=a.msg
+      .replace(/\s*\((?:hits|total):\d+\)/g,'')      // (hits:42) (total:127)
+      .replace(/\s*\d+ hits\/\d+s\s*\|?/g,'')         // 5 hits/10s |
+      .replace(/(\d+\.\d+\.\d+\.\d+):\d+/g,'$1')     // strip port from IP:port
+      .replace(/\s+/g,' ').trim();
+    const key=a.lvl+'|'+norm;
+    if(groupMap[key]!==undefined){
+      const g=groups[groupMap[key]];
+      g.ids.push(a.id);
+      g.totalCount+=(a.n||1);
+      if(a.t>g.latest) g.latest=a.t;
+      if(!a.ack) g.hasUnacked=true;
+    }else{
+      groupMap[key]=groups.length;
+      groups.push({msg:a.msg, lvl:a.lvl, ids:[a.id], totalCount:(a.n||1),
+        latest:a.t, hasUnacked:!a.ack, firstId:a.id, ack:a.ack});
+    }
+  }
+
+  const el=$('alert-list');el.innerHTML='';
+  if(!groups.length){el.innerHTML='<div style="color:var(--dim);padding:20px;text-align:center">No alerts.</div>';return;}
+
+  const bssidRe=/([0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2})/;
+  const ipRe=/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+
+  for(const g of groups){
+    const div=document.createElement('div');
+    const allAcked=!g.hasUnacked;
+    div.className='alert-row'+(allAcked?' acked':'');
+    const secs=(g.latest/1000).toFixed(0);
+    const mins=Math.floor(secs/60);
+    const timeStr=mins>0?mins+'m'+('0'+secs%60).slice(-2)+'s':secs+'s';
+
+    // Count badge
+    const count=g.totalCount;
+    const countBadge=count>1?'<span class="a-count">x'+count+'</span>':'';
+
+    // WIDS approve button
+    const isWids=g.msg&&g.msg.startsWith('WIDS:');
+    const isWidsNew=isWids&&(g.msg.startsWith('WIDS: New network')||g.msg.startsWith('WIDS: EVIL TWIN'));
+    const bssidMatch=isWidsNew?g.msg.match(bssidRe):null;
+    const idsJson=JSON.stringify(g.ids);
+    const approveBtn=bssidMatch?'<button onclick="widsApproveAP(\''+bssidMatch[1]+'\','+g.ids[0]+')" title="Add to WIDS baseline">approve</button>':'';
+
+    // Rule buttons
+    const isRuleAlert=g.msg&&g.msg.startsWith('RULE [');
+    const hasTarget=g.msg&&(ipRe.test(g.msg)||bssidRe.test(g.msg));
+    const msgEsc=JSON.stringify(g.msg).replace(/"/g,'&quot;');
+    const ruleBtn=hasTarget&&!isRuleAlert&&!isWids?
+      '<button onclick="createRuleFromAlert('+msgEsc+')" title="Create rule immediately">rule</button>'+
+      '<button onclick="prefillRuleFromAlert('+msgEsc+')" title="Edit rule before adding">edit rule</button>':'';
+
+    div.innerHTML=
+      '<span class="a-id">#'+g.firstId+'</span>'+
+      '<span class="a-sev '+g.lvl+'">'+g.lvl.toUpperCase()+'</span>'+
+      countBadge+
+      '<span class="a-time">'+timeStr+'</span>'+
+      '<span class="a-msg">'+esc(g.msg)+'</span>'+
+      '<span class="a-actions">'+
+        approveBtn+ruleBtn+
+        (g.hasUnacked?'<button onclick="ackAlertGroup('+idsJson+')">ack'+(count>1?' all':'')+'</button>':'')+
+        '<button onclick="triageAlert('+msgEsc+')">ai</button>'+
+      '</span>';
+    el.appendChild(div);
+  }
+}
+
+// View alerts triggered by a specific rule name
+function viewRuleAlerts(ruleName){
+  switchTab('alerts');
+  // Filter alerts to show only ones from this rule
+  if(lastAlerts.length){
+    const ruleAlerts=lastAlerts.filter(a=>a.msg&&a.msg.includes('RULE ['+ruleName+']'));
+    if(ruleAlerts.length){
+      renderAlerts(ruleAlerts);
+      $('alert-info').textContent=ruleAlerts.length+' alerts for rule "'+ruleName+'"';
+    }else{
+      $('alert-info').textContent='No alerts yet for rule "'+ruleName+'"';
+    }
+  }
+  refreshAlerts();
+}
+
+// Create a rule from an alert — extract IP and add it directly
+async function createRuleFromAlert(msg){
+  const ipRe=/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
+  const macRe=/([0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2})/;
+  const ips=[...msg.matchAll(ipRe)].map(m=>m[1]);
+  const macMatch=msg.match(macRe);
+
+  // Auto-generate a name from the alert type
+  let name='watch';
+  if(msg.includes('ARP SPOOF'))name='arp-watch';
+  else if(msg.includes('PORT SCAN'))name='scan-watch';
+  else if(msg.includes('CLEARTEXT'))name='cred-watch';
+  else if(msg.includes('DNS SPOOF'))name='dns-watch';
+  else if(msg.includes('DNS'))name='dns-watch';
+  else if(msg.includes('DHCP'))name='dhcp-watch';
+  else if(msg.includes('Telnet'))name='telnet-watch';
+
+  let type,value;
+  if(ips.length){ type='src-ip'; value=ips[0]; }
+  else if(macMatch){ type='src-mac'; value=macMatch[1]; }
+  else{ termLog('[ERR] No IP or MAC found in alert','term-alert'); return; }
+
+  const cmd='ids rule add '+name+' '+type+' '+value+' crit';
+  const r=await serialQuery('web exec '+cmd);
+  if(r) termLog(r.ok?'[OK] Rule "'+name+'" watching '+value:'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+
+  // If there's a port in the alert, also watch the port
+  const portRe=/:(\d{2,5})/;
+  const portMatch=msg.match(portRe);
+  if(portMatch&&parseInt(portMatch[1])>0){
+    const port=portMatch[1];
+    const pcmd='ids rule add '+name+'-p dst-port '+port+' warn';
+    await serialQuery('web exec '+pcmd);
+    termLog('[OK] Also watching dst-port '+port,'term-cmd');
+  }
+
+  switchTab('rules');
+  refreshRules();
+}
+
+// Pre-fill rule form from alert — lets user edit before submitting
+function prefillRuleFromAlert(msg){
+  const ipRe=/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+  const macRe=/([0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2})/;
+  const ipMatch=msg.match(ipRe);
+  const macMatch=msg.match(macRe);
+
+  let name='watch';
+  if(msg.includes('ARP SPOOF'))name='arp-watch';
+  else if(msg.includes('PORT SCAN'))name='scan-watch';
+  else if(msg.includes('CLEARTEXT'))name='cred-watch';
+  else if(msg.includes('DNS'))name='dns-watch';
+  else if(msg.includes('DHCP'))name='dhcp-watch';
+  else if(msg.includes('Telnet'))name='telnet-watch';
+
+  switchTab('rules');
+  $('rule-name').value=name;
+  if(ipMatch){
+    $('rule-type').value='src-ip';
+    $('rule-value').value=ipMatch[1];
+  }else if(macMatch){
+    $('rule-type').value='src-mac';
+    $('rule-value').value=macMatch[1];
+  }
+  $('rule-level').value='crit';
+  $('rule-name').focus();
+  $('rule-name').select();
+}
+
+// Pre-fill rule form from map node (IP or MAC)
+function prefillRuleFromNode(ip,mac){
+  switchTab('rules');
+  if(ip&&/\d+\.\d+\.\d+\.\d+/.test(ip)){
+    $('rule-type').value='src-ip';
+    $('rule-value').value=ip;
+    $('rule-name').value='node-watch';
+  }else if(mac){
+    $('rule-type').value='src-mac';
+    $('rule-value').value=mac;
+    $('rule-name').value='mac-watch';
+  }
+  $('rule-level').value='warn';
+  $('rule-name').focus();
+  $('rule-name').select();
+}
+
+async function widsApproveAP(bssid,alertId){
+  const r=await serialQuery('web exec wids approve '+bssid);
+  if(r)termLog(r.ok?'[OK] '+(r.msg||'done'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+  // Ack the alert since we handled it
+  await serialQuery('web exec alert ack '+alertId);
+  refreshAlerts();
+}
+
+async function ackAlert(id){
+  await serialQuery('web exec alert ack '+id);
+  refreshAlerts();
+}
+
+async function ackAlertGroup(ids){
+  for(const id of ids){
+    await serialQuery('web exec alert ack '+id);
+  }
+  refreshAlerts();
+}
+
+async function ackAllAlerts(){
+  await serialQuery('web exec alert ack all');
+  refreshAlerts();
+}
+
+async function clearAlerts(){
+  await serialQuery('web exec alert clear');
+  refreshAlerts();
+}
+
+function triageAlert(msg){
+  switchTab('chat');
+  sendMessage('Security Alert from eth0 IDS:\n'+msg+'\n\nAnalyze this alert. What is the threat? How severe? What should I do?');
+}
+
+function triageAllAlerts(){
+  if(!lastAlerts.length){addMsg('error','No alerts to triage.');return;}
+  const unacked=lastAlerts.filter(a=>!a.ack);
+  const list=(unacked.length?unacked:lastAlerts).slice(-20);
+  const lines=list.map(a=>'['+a.lvl.toUpperCase()+'] '+a.msg).join('\n');
+  switchTab('chat');
+  sendMessage('eth0 IDS Alert Feed ('+list.length+' alerts):\n'+lines+'\n\nTriage these alerts. Prioritize by severity, identify patterns, suggest response actions.');
+}
+
+function exportAlerts(){
+  if(!lastAlerts.length)return;
+  const data=lastAlerts.map(a=>({id:a.id,time:a.t,level:a.lvl,message:a.msg,acknowledged:a.ack}));
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='eth0_alerts_'+Date.now()+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+
+// ══════════════════════════════════════
+//  WIDS Detection Settings
+// ══════════════════════════════════════
+async function widsSetDet(name,val){
+  const v=(typeof val==='boolean')?(val?'on':'off'):String(val);
+  const r=await serialQuery('web exec wids det '+name+' '+v);
+  if(r)termLog(r.ok?'[OK] '+(r.msg||'done'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+}
+
+async function widsSyncSettings(){
+  const d=await serialQuery('web wids');
+  if(!d||!d.det)return;
+  for(const k of ['evilTwin','channelHop','encDown','newNet','flood','jamming','trackers']){
+    const el=$('wids-det-'+k); if(el) el.checked=!!d.det[k];
+  }
+  if(d.missThresh) $('wids-missThresh').value=d.missThresh;
+  if(d.floodThresh) $('wids-floodThresh').value=d.floodThresh;
+}
+
+// ══════════════════════════════════════
+//  SD Card File Browser
+// ══════════════════════════════════════
+let currentFilePath='';
+
+async function refreshFiles(){
+  if(!serialConnected)return;
+  const data=await serialQuery('web files');
+  if(!data||!data.files)return;
+  const el=$('files-list');
+  el.innerHTML='';
+  $('files-info').textContent=data.files.length+' files on SD';
+
+  // Group: config files first, then captures
+  const configs=data.files.filter(f=>!f.name.includes('capture_'));
+  const captures=data.files.filter(f=>f.name.includes('capture_'));
+
+  function addHeader(text){
+    const h=document.createElement('div');
+    h.style.cssText='padding:4px 8px;font-size:10px;color:var(--accent);border-bottom:1px solid var(--border)';
+    h.textContent=text;
+    el.appendChild(h);
+  }
+
+  if(configs.length){
+    addHeader('Config Files');
+    configs.forEach(f=>{
+      const div=document.createElement('div');
+      div.className='file-item'+(f.name===currentFilePath?' active':'');
+      const type=f.name.endsWith('.json')?'JSON':'CSV';
+      div.innerHTML='<span><span class="f-type">'+type+'</span>'+esc(f.name)+'</span>'+
+        '<span style="display:flex;align-items:center;gap:6px"><span class="f-size">'+fmtBytes(f.size)+'</span>'+
+        '<button class="ctrl-btn" style="font-size:9px;padding:1px 6px" onclick="event.stopPropagation();fileDownload(\''+f.name+'\')">dl</button></span>';
+      div.onclick=()=>fileOpen(f.name);
+      el.appendChild(div);
+    });
+  }
+
+  if(captures.length){
+    addHeader('Captures ('+captures.length+')');
+    captures.reverse().forEach(f=>{
+      const div=document.createElement('div');
+      div.className='file-item';
+      div.style.flexWrap='wrap';
+      div.innerHTML='<span><span class="f-type">PCAP</span>'+esc(f.name)+'</span><span class="f-size">'+fmtBytes(f.size)+'</span>'+
+        '<span style="width:100%;display:flex;gap:4px;margin-top:3px">'+
+        '<button class="ctrl-btn" style="font-size:9px;padding:1px 6px" onclick="event.stopPropagation();pcapView(\''+f.name+'\')">View</button>'+
+        '<button class="ctrl-btn" style="font-size:9px;padding:1px 6px" onclick="event.stopPropagation();pcapReplay(\''+f.name+'\')">Replay</button>'+
+        '<button class="ctrl-btn" style="font-size:9px;padding:1px 6px" onclick="event.stopPropagation();fileDownload(\''+f.name+'\')">Download</button>'+
+        '</span>';
+      el.appendChild(div);
+    });
+  }
+}
+
+async function fileOpen(path){
+  currentFilePath=path;
+  $('files-editing').textContent='Loading...';
+  $('files-editing').style.display='inline';
+  // fileread responses have ok:true + data field — goes to exec queue
+  const r=await serialQuery('web fileread '+path);
+  if(!r||!r.ok){
+    $('files-editor').value='Error: '+(r?.msg||'no response');
+    $('files-editor').readOnly=true;
+    $('files-editor-toolbar').style.display='none';
+    $('files-editing').style.display='none';
+    return;
+  }
+  $('files-editor').value=r.data||'';
+  $('files-editor').readOnly=false;
+  $('files-editor-toolbar').style.display='flex';
+  $('files-path').textContent=path+' ('+fmtBytes(r.size)+')';
+  $('files-editing').textContent='Editing: '+path;
+
+  // Highlight active in list
+  document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.file-item').forEach(el=>{
+    if(el.textContent.includes(path)) el.classList.add('active');
+  });
+}
+
+async function fileSave(){
+  if(!currentFilePath)return;
+  const content=$('files-editor').value;
+  // Escape newlines for transport
+  const escaped=content.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\r/g,'\\r').replace(/\t/g,'\\t');
+  const r=await serialQuery('web filewrite '+currentFilePath+' '+escaped);
+  if(r) termLog(r.ok?'[OK] '+(r.msg||'Saved'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+  refreshFiles();
+}
+
+async function fileDelete(){
+  if(!currentFilePath)return;
+  if(!confirm('Delete '+currentFilePath+'?'))return;
+  const r=await serialQuery('web filedel '+currentFilePath);
+  if(r) termLog(r.ok?'[OK] '+(r.msg||'Deleted'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+  currentFilePath='';
+  $('files-editor').value='';
+  $('files-editor').readOnly=true;
+  $('files-editor-toolbar').style.display='none';
+  $('files-editing').style.display='none';
+  refreshFiles();
+}
+
+async function fileReload(){
+  if(currentFilePath) fileOpen(currentFilePath);
+}
+
+// ── Hex stream download ──
+let hexStreamBuf=[];
+let hexStreamName='';
+let hexStreamSize=0;
+let hexStreamResolve=null;
+
+// ── Hex stream file transfer ──
+function hexStreamStart(line){
+  const rest=line.slice(8); // after @HSTART:
+  const sep=rest.lastIndexOf(':');
+  hexStreamName=sep>0?rest.slice(0,sep):rest;
+  hexStreamSize=sep>0?parseInt(rest.slice(sep+1)):0;
+  hexStreamBuf=[];
+  termLog('⬇ Streaming '+hexStreamName+' ('+fmtBytes(hexStreamSize)+')...','term-cmd');
+}
+
+function hexStreamEnd(line){
+  const totalHex=hexStreamBuf.join('');
+  if(!totalHex.length){termLog('[ERR] Empty download','term-alert');hexStreamBuf=[];return;}
+  const bytes=new Uint8Array(totalHex.length/2);
+  for(let i=0;i<bytes.length;i++) bytes[i]=parseInt(totalHex.substr(i*2,2),16);
+  hexStreamBuf=[];
+  const name=hexStreamName.replace(/^\//,'');
+  const mime=name.endsWith('.json')?'application/json':
+    name.endsWith('.csv')?'text/csv':
+    name.endsWith('.pcap')?'application/vnd.tcpdump.pcap':'application/octet-stream';
+  const blob=new Blob([bytes],{type:mime});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  termLog('[OK] Downloaded '+name+' ('+fmtBytes(bytes.length)+')','term-cmd');
+}
+
+function fileDownload(path){
+  if(!serialConnected){termLog('[ERR] Not connected','term-alert');return;}
+  termLog('Requesting download: '+path,'term-cmd');
+  serialSend('web hexstream '+path);
+}
+
+// ── PCAP Viewer ──
+let pcapViewPath='';
+
+async function pcapView(path){
+  pcapViewPath=path;
+  await pcapLoadPage(0);
+}
+
+async function pcapLoadPage(start){
+  termLog('Loading packets from '+pcapViewPath+'...','term-cmd');
+  const r=await serialQuery('web pcaplist '+pcapViewPath+' '+start+' 30', 15000);
+  if(!r||!r.ok){
+    termLog('[ERR] '+(r?.msg||'Cannot read PCAP'),'term-alert');
+    $('files-editor').value='Error: '+(r?.msg||'Failed to read PCAP file');
+    return;
+  }
+
+  $('files-editor-toolbar').style.display='flex';
+  $('files-editing').textContent='Viewing: '+pcapViewPath;
+  $('files-editing').style.display='inline';
+  $('files-editor').readOnly=true;
+
+  const total=r.total||0;
+  const pkts=r.packets||[];
+  let lines=[];
+  lines.push('PCAP: '+pcapViewPath+' | '+total+' packets | Showing '+(start+1)+'-'+Math.min(start+pkts.length,total));
+  lines.push('═'.repeat(100));
+  lines.push(pad('#',6)+pad('Time',14)+pad('Len',7)+pad('Proto',8)+pad('Source',22)+pad('Destination',22)+pad('Ports',16));
+  lines.push('─'.repeat(100));
+
+  pkts.forEach(p=>{
+    const et=p.et||0;
+    const proto=p.p===6?'TCP':p.p===17?'UDP':p.p===1?'ICMP':et===0x0806?'ARP':'0x'+et.toString(16);
+    const ports=(p.sp!==undefined&&p.dp!==undefined)?p.sp+' → '+p.dp:'';
+    const time=p.ts!==undefined?p.ts+'.'+String(p.us||0).padStart(6,'0').slice(0,3):'';
+    lines.push(pad(p.i,6)+pad(time,14)+pad(p.len+'B',7)+pad(proto,8)+pad(p.s||'',22)+pad(p.d||'',22)+pad(ports,16));
+  });
+
+  lines.push('═'.repeat(100));
+  $('files-editor').value=lines.join('\n');
+
+  // Nav buttons in path area
+  $('files-path').innerHTML=pcapViewPath+' — '+total+' pkts'+
+    (start>0?' <button class="ctrl-btn" style="font-size:9px;padding:0 5px" onclick="pcapLoadPage('+(Math.max(0,start-30))+')">◄ Prev</button>':'')+
+    (start+30<total?' <button class="ctrl-btn" style="font-size:9px;padding:0 5px" onclick="pcapLoadPage('+(start+30)+')">Next ►</button>':'');
+}
+
+function pad(s,n){s=String(s);return s.length>=n?s.slice(0,n):s+' '.repeat(n-s.length);}
+
+async function pcapReplay(path){
+  if(!confirm('Replay '+path+' on the wire?'))return;
+  termLog('> replay '+path.replace(/^\//,''),'term-cmd');
+  serialSend('replay '+path.replace(/^\//,''));
+  switchTab('terminal');
+}
+
+// ══════════════════════════════════════
+//  Recon Helpers
+// ══════════════════════════════════════
+function reconRun(cmd){
+  if(!serialConnected){termLog('[ERR] Not connected','term-alert');return;}
+  termLog('> '+cmd,'term-cmd');
+  serialSend(cmd);
+  switchTab('terminal');
+}
+function reconRunTarget(prefix){
+  const ip=$('recon-target').value.trim();
+  if(!ip){termLog('[ERR] Enter a target IP','term-alert');return;}
+  reconRun(prefix+ip);
+}
+function reconPortScan(){
+  const ip=$('recon-target').value.trim();
+  const ports=$('recon-ports').value.trim();
+  if(!ip){termLog('[ERR] Enter a target IP','term-alert');return;}
+  reconRun(ports?'recon ports '+ip+' '+ports:'recon ports '+ip);
+}
+function reconServiceScan(){
+  const ip=$('recon-target').value.trim();
+  const ports=$('recon-ports').value.trim();
+  if(!ip){termLog('[ERR] Enter a target IP','term-alert');return;}
+  reconRun(ports?'recon scan '+ip+' '+ports:'recon scan '+ip);
+}
+
+// ══════════════════════════════════════
+//  Network Map (Mermaid + Pan/Zoom)
+// ══════════════════════════════════════
+let mapAutoTimer=null;
+let mapGenId=0;
+let lastMapData=null;
+
+// Pan/zoom state
+let mapZoom=1, mapPanX=0, mapPanY=0;
+let mapDragging=false, mapDragStartX=0, mapDragStartY=0, mapPanStartX=0, mapPanStartY=0;
+
+function mapApplyTransform(){
+  $('map-viewport').style.transform='translate('+mapPanX+'px,'+mapPanY+'px) scale('+mapZoom+')';
+}
+
+function mapResetView(){
+  mapZoom=1;mapPanX=0;mapPanY=0;
+  // Center the SVG in the container
+  const container=$('map-container');
+  const vp=$('map-viewport');
+  const svg=vp.querySelector('svg');
+  if(svg){
+    const cw=container.clientWidth, ch=container.clientHeight;
+    const sw=svg.getBoundingClientRect().width/mapZoom, sh=svg.getBoundingClientRect().height/mapZoom;
+    mapPanX=Math.max(0,(cw-sw)/2);
+    mapPanY=Math.max(0,(ch-sh)/2);
+  }
+  mapApplyTransform();
+}
+
+// Mouse pan
+$('map-container').addEventListener('mousedown',e=>{
+  if(e.button!==0)return;
+  mapDragging=true;mapDragStartX=e.clientX;mapDragStartY=e.clientY;
+  mapPanStartX=mapPanX;mapPanStartY=mapPanY;
+  $('map-container').classList.add('dragging');
+  e.preventDefault();
+});
+window.addEventListener('mousemove',e=>{
+  if(!mapDragging)return;
+  mapPanX=mapPanStartX+(e.clientX-mapDragStartX);
+  mapPanY=mapPanStartY+(e.clientY-mapDragStartY);
+  mapApplyTransform();
+});
+window.addEventListener('mouseup',()=>{
+  mapDragging=false;$('map-container').classList.remove('dragging');
+});
+
+// Scroll zoom
+$('map-container').addEventListener('wheel',e=>{
+  e.preventDefault();
+  const rect=$('map-container').getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const oldZoom=mapZoom;
+  const delta=e.deltaY>0?0.9:1.1;
+  mapZoom=Math.min(5,Math.max(0.15,mapZoom*delta));
+  // Zoom toward cursor
+  mapPanX=mx-(mx-mapPanX)*(mapZoom/oldZoom);
+  mapPanY=my-(my-mapPanY)*(mapZoom/oldZoom);
+  mapApplyTransform();
+},{passive:false});
+
+// Touch pan/pinch
+let mapTouches=[];
+$('map-container').addEventListener('touchstart',e=>{
+  mapTouches=[...e.touches];
+  if(e.touches.length===1){
+    mapDragStartX=e.touches[0].clientX;mapDragStartY=e.touches[0].clientY;
+    mapPanStartX=mapPanX;mapPanStartY=mapPanY;
+  }
+  e.preventDefault();
+},{passive:false});
+$('map-container').addEventListener('touchmove',e=>{
+  if(e.touches.length===1){
+    mapPanX=mapPanStartX+(e.touches[0].clientX-mapDragStartX);
+    mapPanY=mapPanStartY+(e.touches[0].clientY-mapDragStartY);
+    mapApplyTransform();
+  }else if(e.touches.length===2&&mapTouches.length===2){
+    const oldDist=Math.hypot(mapTouches[0].clientX-mapTouches[1].clientX,mapTouches[0].clientY-mapTouches[1].clientY);
+    const newDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(oldDist>0){
+      const scale=newDist/oldDist;
+      mapZoom=Math.min(5,Math.max(0.15,mapZoom*scale));
+      mapApplyTransform();
+    }
+    mapTouches=[...e.touches];
+  }
+  e.preventDefault();
+},{passive:false});
+
+async function refreshMap(){
+  if(!serialConnected)return;
+  const data=await serialQuery('web map');
+  if(!data||!data.self)return;  // ignore wrong response type
+  renderMap(data);
+}
+
+function renderMap(data){
+  lastMapData=data;
+  const selfIP=data.self?.ip||'?';
+  const selfMAC=data.self?.mac||'?';
+  const gwIP=data.gw||'';
+  const gwInfo=data.gwInfo||{};
+  const hosts=data.hosts||[];
+  const conns=data.conns||[];
+  const switches=data.switches||[];
+
+  const scans=data.scans||[];
+  const nHosts=hosts.length, nConns=conns.length, nSw=switches.length;
+  const osCount=hosts.filter(h=>h.os).length;
+  const scanningCount=scans.filter(s=>s.state===1).length;
+  const scannedCount=scans.filter(s=>s.state===2).length;
+  let info=nHosts+' hosts, '+nConns+' conns, '+osCount+' fingerprinted';
+  if(nSw) info+=', '+nSw+' switches';
+  if(scanningCount) info+=', '+scanningCount+' scanning';
+  if(scannedCount) info+=', '+scannedCount+' scanned';
+  $('map-info').textContent=info;
+
+  const nid=ip=>ip?'h_'+ip.replace(/\./g,'_'):'';
+  // Mermaid-safe label: escape quotes and special chars
+  const ml=s=>s?s.replace(/"/g,"'").replace(/[[\]{}()<>#&]/g,''):'';
+
+  const connectedNodes=new Set();
+  conns.forEach(c=>{connectedNodes.add(c.a);connectedNodes.add(c.b);});
+
+  // Build scan lookup: ip -> {state, ports[{p,b}]}
+  const scanMap={};
+  (data.scans||[]).forEach(s=>{ scanMap[s.ip]=s; });
+
+  let lines=['graph TD'];
+  lines.push('classDef self fill:#0c6,stroke:#0c6,color:#000,stroke-width:3px');
+  lines.push('classDef gateway fill:#e80,stroke:#e80,color:#000,stroke-width:2px');
+  lines.push('classDef host fill:#1a2a3a,stroke:#0af,color:#ccc,stroke-width:1px');
+  lines.push('classDef recent fill:#1a3a1a,stroke:#0c6,color:#ccc,stroke-width:1px');
+  lines.push('classDef active fill:#1a1a2a,stroke:#f0f,color:#ccc,stroke-width:2px');
+  lines.push('classDef switch fill:#333,stroke:#ff0,color:#ff0,stroke-width:2px');
+  lines.push('classDef windows fill:#1a1a2a,stroke:#0af,color:#0af,stroke-width:1px');
+  lines.push('classDef linux fill:#1a2a1a,stroke:#0c6,color:#0c6,stroke-width:1px');
+  lines.push('classDef apple fill:#2a1a2a,stroke:#c8c,color:#c8c,stroke-width:1px');
+  lines.push('classDef netdev fill:#2a2a1a,stroke:#e80,color:#e80,stroke-width:1px');
+  lines.push('classDef scanning fill:#2a2a00,stroke:#ff0,color:#ff0,stroke-width:2px,stroke-dasharray:5 3');
+  lines.push('classDef tracker fill:#2a0a0a,stroke:#f33,color:#f33,stroke-width:3px,stroke-dasharray:4 2');
+  lines.push('classDef wifiopen fill:#2a2a00,stroke:#ff0,color:#ff0,stroke-width:2px');
+
+  // Self node
+  const selfId=nid(selfIP);
+  lines.push(selfId+'{"'+selfIP+'\\neth0 | '+shortMac(selfMAC)+'\\nLinux"}:::self');
+
+  // Gateway node (enriched)
+  let gwId='';
+  if(gwIP&&gwIP!=='0.0.0.0'){
+    gwId=nid(gwIP);
+    let gwLabel=gwIP+'\\nGateway';
+    if(gwInfo.name) gwLabel=ml(gwInfo.name)+'\\n'+gwIP;
+    if(gwInfo.os) gwLabel+='\\n'+ml(gwInfo.os);
+    if(gwInfo.mac) gwLabel+='\\n'+shortMac(gwInfo.mac);
+    lines.push(gwId+'{"'+gwLabel+'"}:::gateway');
+    lines.push(selfId+' === '+gwId);
+  }
+
+  // LLDP/CDP switches
+  switches.forEach((sw,i)=>{
+    const swId='sw_'+i;
+    let label=ml(sw.name)||'Switch';
+    if(sw.port) label+='\\nPort: '+ml(sw.port);
+    if(sw.desc) label+='\\n'+ml(sw.desc).slice(0,30);
+    if(sw.vlan) label+='\\nVLAN '+sw.vlan;
+    label+='\\n'+sw.type;
+    lines.push(swId+'[/"'+label+'"/]:::switch');
+    lines.push(selfId+' --- '+swId);
+  });
+
+  const connPairs=new Set();
+  conns.forEach(c=>connPairs.add(c.a+'|'+c.b));
+
+  // Host nodes with OS + hostname + scan results
+  hosts.forEach(h=>{
+    const id=nid(h.ip);
+    const scan=scanMap[h.ip];
+
+    // Pick style class
+    let cls='host';
+    if(scan&&scan.state===1) cls='scanning';
+    else if(connectedNodes.has(h.ip)) cls='active';
+    else if(h.age<30) cls='recent';
+    if(h.os&&cls!=='scanning'){
+      const lo=h.os.toLowerCase();
+      if(lo.includes('windows')) cls='windows';
+      else if(lo.includes('linux')||lo.includes('unix')) cls='linux';
+      else if(lo.includes('mac')||lo.includes('ios')) cls='apple';
+      else if(lo.includes('network')||lo.includes('device')) cls='netdev';
+    }
+
+    let label=h.ip;
+    if(h.name) label=ml(h.name)+'\\n'+h.ip;
+    if(h.os) label+='\\n'+ml(h.os);
+    label+='\\n'+shortMac(h.mac);
+    if(h.ttl) label+='\\nTTL:'+h.ttl;
+
+    // Add scan state + open ports
+    if(scan){
+      if(scan.state===1){
+        label+='\\nSCANNING...';
+      }else if(scan.state===2&&scan.ports.length>0){
+        const portList=scan.ports.map(p=>{
+          let s=p.p+'';
+          if(p.b) s+='/'+ml(p.b).slice(0,15);
+          return s;
+        }).join(', ');
+        label+='\\nPorts: '+portList;
+      }else if(scan.state===2){
+        label+='\\nNo open ports';
+      }
+    }
+
+    // Live stats line
+    let stats=[];
+    if(h.pkts) stats.push(fmtNum(h.pkts)+' pkts');
+    if(h.bytes) stats.push(fmtBytes(h.bytes));
+    if(h.conns) stats.push(h.conns+' conn'+(h.conns>1?'s':''));
+    if(stats.length) label+='\\n'+stats.join(' | ');
+
+    // Alert badge
+    if(h.alerts) label+='\\n!! '+h.alerts+' alert'+(h.alerts>1?'s':'');
+
+    lines.push(id+'["'+label+'"]:::'+cls);
+    if(gwId&&!connPairs.has(h.ip+'|'+gwIP)&&!connPairs.has(gwIP+'|'+h.ip)){
+      lines.push(id+' -.- '+gwId);
+    }
+  });
+
+  // ── WiFi AP nodes (diamond shape) ──
+  const wifiNets=data.wifi||[];
+  if(wifiNets.length>0){
+    lines.push('subgraph wifi_sub["WiFi Networks"]');
+    lines.push('direction LR');
+    wifiNets.forEach((w,i)=>{
+      const wid='wifi_'+i;
+      const ssid=ml(w.ssid)||'Hidden';
+      const enc=w.enc||'?';
+      const isOpen=enc==='OPEN';
+      const signal=w.rssi>=-50?'Strong':w.rssi>=-70?'Good':w.rssi>=-85?'Weak':'Far';
+      let label=ssid+'\\nCH:'+w.ch+' '+enc+'\\n'+w.rssi+'dBm '+signal;
+      label+='\\n'+w.bssid;
+      // Diamond shape for APs
+      const cls=isOpen?'wifiopen':'host';
+      lines.push(wid+'{{"'+label+'"}}:::'+cls);
+    });
+    lines.push('end');
+    // Style the subgraph
+    lines.push('style wifi_sub fill:transparent,stroke:#0af,stroke-dasharray:5 3,color:#0af');
+  }
+
+  // ── BLE device nodes (rounded) ──
+  const bleDevs=data.ble||[];
+  if(bleDevs.length>0){
+    lines.push('subgraph ble_sub["BLE Devices"]');
+    lines.push('direction LR');
+    bleDevs.forEach((b,i)=>{
+      const bid='ble_'+i;
+      const name=ml(b.name)||'Unknown';
+      const signal=b.rssi>=-50?'Near':b.rssi>=-70?'Mid':b.rssi>=-85?'Far':'Distant';
+      let label=name+'\\n'+b.addr+'\\n'+b.rssi+'dBm '+signal;
+      if(b.mfr) label+='\\n'+ml(b.mfr);
+      const isTracker=b.mfr&&(b.mfr.match(/AirTag|Tile|SmartTag|FindMy|Chipolo/));
+      if(isTracker) label='⚠ '+label;
+      lines.push(bid+'(["'+label+'"]):::'+(isTracker?'tracker':'apple'));
+    });
+    lines.push('end');
+    lines.push('style ble_sub fill:transparent,stroke:#c8c,stroke-dasharray:5 3,color:#c8c');
+  }
+
+  // Link eth0 to wireless subgraphs
+  if(wifiNets.length>0) lines.push(selfId+' -.->|"WiFi Radio"| wifi_sub');
+  if(bleDevs.length>0) lines.push(selfId+' -.->|"BLE Radio"| ble_sub');
+
+  // Connection edges
+  conns.forEach(c=>{
+    const aId=nid(c.a), bId=nid(c.b);
+    const label=c.ports.map(p=>':'+p).join(' ');
+    lines.push(aId+' -->|"'+label+'"| '+bId);
+  });
+
+  const def=lines.join('\n');
+  const container=$('map-mermaid');
+  mapGenId++;
+  const id='map-svg-'+mapGenId;
+  container.innerHTML='';
+
+  mermaid.render(id, def).then(({svg})=>{
+    container.innerHTML=svg;
+    // Inject animated flow on connection edges
+    const svgEl=container.querySelector('svg');
+    if(svgEl){
+      // Remove fixed dimensions so it scales
+      svgEl.removeAttribute('width');
+      svgEl.removeAttribute('height');
+      svgEl.style.minWidth='600px';
+      svgEl.style.minHeight='400px';
+      // Animate all edge paths (arrows)
+      svgEl.querySelectorAll('.edge-pattern path, .flowchart-link').forEach(p=>{
+        p.style.strokeDasharray='8 4';
+        p.style.animation='flowDash 0.7s linear infinite';
+      });
+      // Style arrowheads
+      svgEl.querySelectorAll('marker path').forEach(p=>{
+        p.style.strokeDasharray='none';
+        p.style.animation='none';
+      });
+    }
+    // If first render, center it
+    if(mapGenId<=2) setTimeout(mapResetView,50);
+    // Attach click handlers to nodes
+    setTimeout(attachNodeClickHandlers,100);
+  }).catch(e=>{
+    container.innerHTML='<div style="color:var(--red);padding:20px">Diagram error: '+esc(e.message)+'</div>';
+  });
+}
+
+function shortMac(m){return m?m.slice(0,8)+'..':'';}
+function fmtNum(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(1)+'K':n+'';}
+function fmtBytes(b){return b>=1048576?(b/1048576).toFixed(1)+'MB':b>=1024?(b/1024).toFixed(1)+'KB':b+'B';}
+
+// ── Node context menu ──
+let selectedNodeIP='';
+let selectedNodeData=null;
+
+function showNodeMenu(x, y, ip, hostData){
+  selectedNodeIP=ip;
+  selectedNodeData=hostData;
+  const menu=$('node-menu');
+  $('nm-ip').textContent=ip;
+  let detail='';
+  if(hostData){
+    if(hostData.name) detail+=hostData.name+' | ';
+    if(hostData.os) detail+=hostData.os+' | ';
+    if(hostData.mac) detail+=hostData.mac;
+    // Add stats if available from last map data
+    const h=(lastMapData?.hosts||[]).find(h=>h.ip===ip);
+    if(h){
+      let stats=[];
+      if(h.pkts) stats.push(fmtNum(h.pkts)+' pkts');
+      if(h.bytes) stats.push(fmtBytes(h.bytes));
+      if(h.conns) stats.push(h.conns+' conns');
+      if(h.alerts) stats.push(h.alerts+' alerts');
+      if(stats.length) detail+=(detail?' | ':'')+stats.join(' | ');
+    }
+  }
+  $('nm-detail').textContent=detail||'';
+  $('nm-detail').style.display=detail?'block':'none';
+
+  // Position menu within viewport
+  menu.style.left=Math.min(x, window.innerWidth-200)+'px';
+  menu.style.top=Math.min(y, window.innerHeight-280)+'px';
+  menu.classList.add('show');
+}
+
+function hideNodeMenu(){$('node-menu').classList.remove('show');}
+
+// Close menu on click outside
+document.addEventListener('click',e=>{
+  if(!$('node-menu').contains(e.target)) hideNodeMenu();
+});
+
+async function nodeAction(action){
+  hideNodeMenu();
+  const ip=selectedNodeIP;
+  if(!ip||!serialConnected)return;
+
+  switch(action){
+    case 'portscan':
+      termLog('> recon ports '+ip,'term-cmd');
+      serialSend('recon ports '+ip);
+      switchTab('terminal');
+      break;
+    case 'servicescan':
+      termLog('> recon scan '+ip,'term-cmd');
+      serialSend('recon scan '+ip);
+      switchTab('terminal');
+      break;
+    case 'nbstat':
+      await serialQuery('web exec recon netbios '+ip);
+      termLog('NBSTAT query sent to '+ip,'term-cmd');
+      break;
+    case 'mitm':
+      const r=await serialQuery('web exec mitm start '+ip);
+      if(r) termLog(r.ok?'[OK] '+r.msg:'[ERR] '+(r.error||r.msg||'unknown'), r.ok?'term-cmd':'term-alert');
+      pollStatus();
+      break;
+    case 'kill':
+      const k=await serialQuery('web exec kill '+ip);
+      if(k) termLog(k.ok?'[OK] '+k.msg:'[ERR] '+(k.error||k.msg), k.ok?'term-cmd':'term-alert');
+      break;
+    case 'addRule':
+      prefillRuleFromNode(ip, selectedNodeData?.mac);
+      break;
+    case 'copyip':
+      const copyVal=selectedNodeData?.mac||ip;
+      navigator.clipboard.writeText(copyVal).then(()=>termLog('Copied: '+copyVal,'term-cmd'));
+      break;
+    case 'askAI':
+      let ctx='Host: '+ip;
+      if(selectedNodeData){
+        if(selectedNodeData.name) ctx+='\nHostname: '+selectedNodeData.name;
+        if(selectedNodeData.os) ctx+='\nOS: '+selectedNodeData.os;
+        if(selectedNodeData.mac) ctx+='\nMAC: '+selectedNodeData.mac;
+        if(selectedNodeData.ttl) ctx+='\nTTL: '+selectedNodeData.ttl;
+      }
+      // Include scan results if available
+      if(lastMapData?.scans){
+        const scan=lastMapData.scans.find(s=>s.ip===ip);
+        if(scan&&scan.ports&&scan.ports.length>0){
+          ctx+='\nOpen Ports:';
+          scan.ports.forEach(p=>{ctx+='\n  '+p.p+'/tcp'+(p.b?' — '+p.b:'');});
+        }
+      }
+      switchTab('chat');
+      $('user-input').value='What can you tell me about this host? What attack vectors or vulnerabilities might it have?';
+      sendMessage(ctx);
+      break;
+  }
+}
+
+function attachNodeClickHandlers(){
+  const svgEl=$('map-mermaid').querySelector('svg');
+  if(!svgEl) return;
+
+  // Find all node groups in the rendered SVG
+  svgEl.querySelectorAll('.node').forEach(node=>{
+    node.style.cursor='pointer';
+    node.addEventListener('click', e=>{
+      e.stopPropagation();
+
+      const nodeId=node.id||node.getAttribute('data-id')||'';
+
+      // Check if it's a WiFi or BLE node
+      const wifiMatch=nodeId.match(/wifi_(\d+)/);
+      if(wifiMatch){
+        const idx=parseInt(wifiMatch[1]);
+        const wNet=(lastMapData?.wifi||[])[idx];
+        if(wNet){
+          selectedNodeIP=wNet.bssid;
+          selectedNodeData={name:wNet.ssid||'Hidden',mac:wNet.bssid,os:wNet.enc+' CH:'+wNet.ch,ttl:null,rssi:wNet.rssi,type:'wifi'};
+          $('nm-ip').textContent=(wNet.ssid||'Hidden')+' (WiFi)';
+          $('nm-detail').textContent=wNet.bssid+' | CH:'+wNet.ch+' | '+wNet.rssi+'dBm | '+wNet.enc;
+          $('nm-detail').style.display='block';
+          $('node-menu').querySelectorAll('button').forEach(b=>b.style.display=b.textContent.match(/Copy|Ask AI/)?'block':'none');
+          const rect=node.getBoundingClientRect();
+          $('node-menu').style.left=Math.min(e.clientX,window.innerWidth-200)+'px';
+          $('node-menu').style.top=Math.min(e.clientY,window.innerHeight-200)+'px';
+          $('node-menu').classList.add('show');
+        }
+        return;
+      }
+      const bleMatch=nodeId.match(/ble_(\d+)/);
+      if(bleMatch){
+        const idx=parseInt(bleMatch[1]);
+        const bDev=(lastMapData?.ble||[])[idx];
+        if(bDev){
+          selectedNodeIP=bDev.addr;
+          selectedNodeData={name:bDev.name||'Unknown',mac:bDev.addr,os:bDev.mfr||'BLE',ttl:null,rssi:bDev.rssi,type:'ble'};
+          $('nm-ip').textContent=(bDev.name||'Unknown')+' (BLE)';
+          $('nm-detail').textContent=bDev.addr+' | '+bDev.rssi+'dBm'+(bDev.mfr?' | '+bDev.mfr:'');
+          $('nm-detail').style.display='block';
+          $('node-menu').querySelectorAll('button').forEach(b=>b.style.display=b.textContent.match(/Copy|Ask AI/)?'block':'none');
+          const rect=node.getBoundingClientRect();
+          $('node-menu').style.left=Math.min(e.clientX,window.innerWidth-200)+'px';
+          $('node-menu').style.top=Math.min(e.clientY,window.innerHeight-200)+'px';
+          $('node-menu').classList.add('show');
+        }
+        return;
+      }
+
+      // Wired host: extract IP from node ID (format: h_192_168_1_5)
+      const idMatch=nodeId.match(/h_(\d+)_(\d+)_(\d+)_(\d+)/);
+      if(!idMatch) return;
+      const ip=idMatch[1]+'.'+idMatch[2]+'.'+idMatch[3]+'.'+idMatch[4];
+
+      // Find host data from last map render
+      const allHosts=(lastMapData?.hosts||[]);
+      let hostData=allHosts.find(h=>h.ip===ip)||null;
+      // Check if it's the gateway
+      if(!hostData && ip===lastMapData?.gw){
+        hostData=lastMapData?.gwInfo||{};
+        hostData.ip=ip;
+      }
+
+      // Show all buttons for wired hosts
+      $('node-menu').querySelectorAll('button').forEach(b=>b.style.display='block');
+      showNodeMenu(e.clientX, e.clientY, ip, hostData);
+    });
+  });
+}
+
+// ══════════════════════════════════════
+//  Context Injectors
+// ══════════════════════════════════════
+async function ctxTraffic(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const pkts=await serialQuery('web packets');
+  if(!pkts||!pkts.length){addMsg('error','No packets captured.');return;}
+  const lines=pkts.map(p=>p.info+' ('+p.len+'b)').join('\n');
+  switchTab('chat');sendMessage('Recent network traffic ('+pkts.length+' packets):\n'+lines);
+}
+async function ctxArp(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const tbl=await serialQuery('web arp');
+  if(!tbl||!tbl.length){addMsg('error','ARP table empty.');return;}
+  switchTab('chat');sendMessage('ARP Table:\n'+tbl.map(e=>e.ip+' -> '+e.mac+' ('+e.age+'s ago)').join('\n'));
+}
+async function ctxConns(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const c=await serialQuery('web conns');
+  if(!c||!c.length){addMsg('error','No connections.');return;}
+  switchTab('chat');sendMessage('TCP Connections:\n'+c.map(x=>x.src+' -> '+x.dst+' ('+x.age+'s ago)').join('\n'));
+}
+async function ctxMap(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const[s,arp,conns]=await Promise.all([serialQuery('web json'),serialQuery('web arp'),serialQuery('web conns')]);
+  let ctx='Device: '+(s?.ip||'?')+' ('+(s?.mac||'?')+')\nGateway: '+(s?.gw||'?')+'\n\n';
+  if(arp?.length)ctx+='Hosts (ARP):\n'+arp.map(e=>'  '+e.ip+' = '+e.mac).join('\n')+'\n\n';
+  if(conns?.length)ctx+='Connections:\n'+conns.map(c=>'  '+c.src+' -> '+c.dst).join('\n')+'\n';
+  ctx+='\nStats: '+(s?.packets||0)+' captured, '+(s?.sent||0)+' sent';
+  switchTab('chat');sendMessage('Network Map:\n'+ctx);
+}
+
+async function ctxWifi(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const w=await serialQuery('web wifi');
+  if(!w||!w.length){addMsg('error','No WiFi networks. Run wifi scan first.');return;}
+  const lines=w.map(n=>n.ssid+(n.hidden?' (hidden)':'')+' | BSSID:'+n.bssid+' | CH:'+n.ch+' | RSSI:'+n.rssi+'dBm | '+n.enc).join('\n');
+  switchTab('chat');sendMessage('WiFi Networks ('+w.length+' found):\n'+lines);
+}
+async function ctxBle(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const b=await serialQuery('web ble');
+  if(!b||!b.length){addMsg('error','No BLE devices. Run ble scan first.');return;}
+  const lines=b.map(d=>(d.name||'(unnamed)')+' | '+d.addr+' | RSSI:'+d.rssi+'dBm'+(d.mfr?' | '+d.mfr:'')).join('\n');
+  switchTab('chat');sendMessage('BLE Devices ('+b.length+' found):\n'+lines);
+}
+
+// ══════════════════════════════════════
+//  PCAP Parser
+// ══════════════════════════════════════
+function parsePcapFile(buf){
+  const dv=new DataView(buf);if(buf.byteLength<24)return null;
+  const magic=dv.getUint32(0);const le=magic===0xd4c3b2a1,be=magic===0xa1b2c3d4;
+  if(!le&&!be)return null;
+  const r16=(o)=>le?dv.getUint16(o,true):dv.getUint16(o,false);
+  const r32=(o)=>le?dv.getUint32(o,true):dv.getUint32(o,false);
+  const linkType=r32(20);let off=24;const packets=[];
+  while(off+16<=buf.byteLength&&packets.length<200){
+    const tsSec=r32(off),tsUsec=r32(off+4),capLen=r32(off+8),origLen=r32(off+12);off+=16;
+    if(off+capLen>buf.byteLength)break;
+    const pkt=new Uint8Array(buf,off,capLen);let info='',proto='?';
+    if(linkType===1&&capLen>=14){
+      const et=(pkt[12]<<8)|pkt[13];
+      if(et===0x0806&&capLen>=42){proto='ARP';const op=(pkt[20]<<8)|pkt[21];
+        info='ARP '+(op===1?'who-has':'is-at')+' '+pkt[28]+'.'+pkt[29]+'.'+pkt[30]+'.'+pkt[31]+' -> '+pkt[38]+'.'+pkt[39]+'.'+pkt[40]+'.'+pkt[41];
+      }else if(et===0x0800&&capLen>=34){
+        const ihl=(pkt[14]&0x0f)*4,p=pkt[23],sip=pkt[26]+'.'+pkt[27]+'.'+pkt[28]+'.'+pkt[29],dip=pkt[30]+'.'+pkt[31]+'.'+pkt[32]+'.'+pkt[33];
+        if(p===6&&capLen>=14+ihl+20){proto='TCP';const sp=(pkt[14+ihl]<<8)|pkt[14+ihl+1],dp=(pkt[14+ihl+2]<<8)|pkt[14+ihl+3],fl=pkt[14+ihl+13];
+          let fs=[];if(fl&2)fs.push('S');if(fl&16)fs.push('A');if(fl&8)fs.push('P');if(fl&1)fs.push('F');if(fl&4)fs.push('R');
+          info='TCP '+sip+':'+sp+' > '+dip+':'+dp+' ['+fs.join(',')+']';
+        }else if(p===17&&capLen>=14+ihl+8){proto='UDP';const sp=(pkt[14+ihl]<<8)|pkt[14+ihl+1],dp=(pkt[14+ihl+2]<<8)|pkt[14+ihl+3];
+          let svc='';if(dp===53||sp===53)svc=' DNS';else if(dp===67||dp===68)svc=' DHCP';
+          info='UDP '+sip+':'+sp+' > '+dip+':'+dp+svc;
+        }else if(p===1){proto='ICMP';info='ICMP '+sip+' > '+dip;
+        }else{proto='IP';info='IP proto='+p+' '+sip+' > '+dip;}
+      }else info='EtherType 0x'+et.toString(16)+' '+capLen+'b';
+    }else info=capLen+'b (linktype='+linkType+')';
+    packets.push({ts:tsSec+tsUsec/1e6,len:origLen,proto,info});off+=capLen;
+  }
+  return packets;
+}
+
+// ══════════════════════════════════════
+//  Settings
+// ══════════════════════════════════════
+function saveSettings(){localStorage.setItem('eth0_cfg',JSON.stringify({
+  provider:$('provider').value,model:$('model').value,apiKey:$('api-key').value,
+  sys:$('system-prompt').value,maxTok:$('max-tokens').value}));}
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem('eth0_cfg'));if(!s)return;
+  if(s.provider)$('provider').value=s.provider;updateModels();if(s.model)$('model').value=s.model;
+  if(s.apiKey)$('api-key').value=s.apiKey;if(s.sys)$('system-prompt').value=s.sys;
+  if(s.maxTok)$('max-tokens').value=s.maxTok;}catch(e){}}
+function updateModels(){const p=PROVIDERS[$('provider').value];$('model').innerHTML='';
+  p.models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;$('model').appendChild(o);});}
+function switchTab(name){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.toggle('active',t.id==='tab-'+name));
+  if(name==='alerts')refreshAlerts();
+  if(name==='packets')refreshPackets();
+  if(name==='rules')refreshRules();
+  if(name==='map')refreshMap();
+  if(name==='control')widsSyncSettings();
+  if(name==='files')refreshFiles();}
+function autoResize(){const el=$('user-input');el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+// ══════════════════════════════════════
+//  Event Wiring
+// ══════════════════════════════════════
+$('connect-btn').addEventListener('click',serialConnect);
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+$('settings-btn').addEventListener('click',()=>$('settings').classList.toggle('open'));
+$('provider').addEventListener('change',()=>{updateModels();saveSettings();});
+$('model').addEventListener('change',saveSettings);
+$('api-key').addEventListener('input',saveSettings);
+$('system-prompt').addEventListener('input',saveSettings);
+$('max-tokens').addEventListener('change',saveSettings);
+$('key-toggle').addEventListener('click',()=>{const i=$('api-key');i.type=i.type==='password'?'text':'password';});
+
+$('send-btn').addEventListener('click',()=>{if(streaming&&abortCtl)abortCtl.abort();else sendMessage();});
+$('user-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!streaming)sendMessage();}});
+$('user-input').addEventListener('input',autoResize);
+
+$('ctx-traffic').addEventListener('click',ctxTraffic);
+$('ctx-map').addEventListener('click',ctxMap);
+$('ctx-conns').addEventListener('click',ctxConns);
+$('ctx-arp').addEventListener('click',ctxArp);
+$('ctx-wifi').addEventListener('click',ctxWifi);
+$('ctx-ble').addEventListener('click',ctxBle);
+$('ctx-pcap-ai').addEventListener('click',()=>{
+  if(!parsedPcap||!parsedPcap.length){addMsg('error','Upload a PCAP file first.');return;}
+  switchTab('chat');sendMessage('PCAP Analysis ('+parsedPcap.length+' packets):\n'+parsedPcap.map(p=>p.ts.toFixed(3)+'s '+p.info+' ('+p.len+'b)').join('\n'));
+});
+
+$('pcap-btn').addEventListener('click',()=>$('pcap-input').click());
+$('pcap-input').addEventListener('change',e=>{
+  if(!e.target.files[0])return;const f=e.target.files[0];
+  const r=new FileReader();r.onload=()=>{
+    parsedPcap=parsePcapFile(r.result);
+    if(parsedPcap)addMsg('system','Loaded '+parsedPcap.length+' packets from '+f.name);
+    else addMsg('error','Invalid PCAP file.');
+  };r.readAsArrayBuffer(f);e.target.value='';
+});
+
+$('term-cmd').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const cmd=$('term-cmd').value.trim();if(cmd&&serialConnected){
+    termLog('> '+cmd,'term-cmd');serialSend(cmd);}$('term-cmd').value='';}
+});
+
+$('pkt-refresh').addEventListener('click',refreshPackets);
+$('pkt-filter').addEventListener('change',()=>renderPackets(lastPackets));
+$('pkt-send-ai').addEventListener('click',()=>{
+  if(!lastPackets.length){addMsg('error','No packets.');return;}
+  switchTab('chat');sendMessage('Live capture ('+lastPackets.length+' packets):\n'+lastPackets.map(p=>p.info+' ('+p.len+'b)').join('\n'));
+});
+$('pkt-auto').addEventListener('click',function(){
+  if(pktAutoTimer){clearInterval(pktAutoTimer);pktAutoTimer=null;this.textContent='Auto: Off';}
+  else{pktAutoTimer=setInterval(refreshPackets,3000);this.textContent='Auto: On';refreshPackets();}
+});
+
+// Alerts
+$('alert-refresh').addEventListener('click',refreshAlerts);
+$('alert-auto').addEventListener('click',function(){
+  if(alertAutoTimer){clearInterval(alertAutoTimer);alertAutoTimer=null;this.textContent='Live: Off';}
+  else{alertAutoTimer=setInterval(refreshAlerts,3000);this.textContent='Live: On';refreshAlerts();}
+});
+$('alert-filter').addEventListener('change',()=>renderAlerts(lastAlerts));
+$('alert-ack-all').addEventListener('click',ackAllAlerts);
+$('alert-clear').addEventListener('click',clearAlerts);
+$('alert-ai').addEventListener('click',triageAllAlerts);
+$('alert-export').addEventListener('click',exportAlerts);
+
+// Map
+$('map-refresh').addEventListener('click',refreshMap);
+$('map-auto').addEventListener('click',function(){
+  if(mapAutoTimer){clearInterval(mapAutoTimer);mapAutoTimer=null;this.textContent='Live: Off';}
+  else{mapAutoTimer=setInterval(refreshMap,5000);this.textContent='Live: On';refreshMap();}
+});
+$('map-reset-view').addEventListener('click',mapResetView);
+$('map-sweep').addEventListener('click',async()=>{
+  if(!serialConnected)return;
+  $('map-info').textContent='Sweeping...';
+  await serialQuery('web exec recon sweep',15000);
+  setTimeout(refreshMap,2000);
+});
+
+// Rules
+$('rules-refresh').addEventListener('click',refreshRules);
+$('rules-export').addEventListener('click',exportRules);
+$('rules-import-btn').addEventListener('click',()=>$('rules-import-input').click());
+$('rules-import-input').addEventListener('change',e=>{if(e.target.files[0])importRules(e.target.files[0]);e.target.value='';});
+$('rules-save').addEventListener('click',async()=>{if(serialConnected)await serialQuery('web exec ids rule save');});
+$('rules-load').addEventListener('click',async()=>{if(serialConnected){await serialQuery('web exec ids rule load');refreshRules();}});
+$('rules-clear').addEventListener('click',async()=>{if(serialConnected){await serialQuery('web exec ids rule clear');refreshRules();}});
+$('rules-add-btn').addEventListener('click',addRule);
+$('rule-value').addEventListener('keydown',e=>{if(e.key==='Enter')addRule();});
+
+// Init
+mermaid.initialize({startOnLoad:false,theme:'dark',themeVariables:{
+  primaryColor:'#1a2a3a',primaryTextColor:'#ccc',primaryBorderColor:'#0af',
+  lineColor:'#444',secondaryColor:'#1a1a1a',tertiaryColor:'#111',
+  fontFamily:'Courier New, monospace',fontSize:'12px'
+}});
+updateModels();loadSettings();
+if(!navigator.serial)addMsg('error','Web Serial API not supported. Use Chrome or Edge.');
+</script>
 </body>
-
 </html>
