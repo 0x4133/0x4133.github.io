@@ -398,7 +398,8 @@ margin-left:4px;vertical-align:top}
     </div>
     <div class="ctrl-section"><h3>Recon</h3>
       <div class="ctrl-row">
-        <button class="ctrl-btn" onclick="execCmd('recon sweep')">ARP Sweep</button>
+        <input class="ctrl-input" id="ctl-sweep-cidr" placeholder="IP/CIDR (opt, /16-/30)" style="width:170px">
+        <button class="ctrl-btn" onclick="execCmd(buildSweepCmd('ctl-sweep-cidr'))">ARP Sweep</button>
         <input class="ctrl-input" id="kill-ip" placeholder="Target IP">
         <button class="ctrl-btn danger" onclick="execCmd('kill '+$('kill-ip').value.trim())">Kill Conns</button>
       </div>
@@ -411,7 +412,8 @@ margin-left:4px;vertical-align:top}
   <div style="display:flex;flex-direction:column;gap:8px;padding:12px;height:100%;overflow-y:auto">
     <div class="ctrl-section"><h3>Network Discovery</h3>
       <div class="ctrl-row">
-        <button class="ctrl-btn" onclick="reconRun('recon sweep')">ARP Sweep</button>
+        <input class="ctrl-input" id="recon-sweep-cidr" placeholder="IP/CIDR (opt, /16-/30)" style="width:170px">
+        <button class="ctrl-btn" onclick="reconSweep('recon-sweep-cidr')">ARP Sweep</button>
         <button class="ctrl-btn" onclick="reconRun('recon mdns')">mDNS/NBNS</button>
         <button class="ctrl-btn" onclick="reconRun('recon lldp')">LLDP/CDP</button>
         <button class="ctrl-btn" onclick="reconRun('recon fingerprint')">OS Fingerprint</button>
@@ -456,6 +458,7 @@ margin-left:4px;vertical-align:top}
   <div class="map-toolbar">
     <button id="map-refresh">Refresh</button>
     <button id="map-auto">Live: Off</button>
+    <input id="map-sweep-cidr" placeholder="IP/CIDR (opt, /16-/30)" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit;width:160px">
     <button id="map-sweep">ARP Sweep First</button>
     <button id="map-reset-view">Reset View</button>
     <span id="map-info">Connect to device and run ARP sweep to discover hosts</span>
@@ -1584,6 +1587,24 @@ function reconRun(cmd){
   serialSend(cmd);
   switchTab('terminal');
 }
+// Build a "recon sweep" command, optionally with an IP/CIDR argument.
+// Firmware (eth0.ino) accepts CIDR /16..30; empty input sweeps the local /24.
+function buildSweepCmd(inputId){
+  const el=$(inputId);
+  const v=el?el.value.trim():'';
+  if(!v)return'recon sweep';
+  const m=v.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:\/(\d{1,2}))?$/);
+  if(!m){termLog('[ERR] Invalid sweep target. Use X.X.X.X or X.X.X.X/NN','term-alert');return null;}
+  if(m[2]!==undefined){
+    const c=parseInt(m[2],10);
+    if(c<16||c>30){termLog('[ERR] CIDR must be between /16 and /30','term-alert');return null;}
+  }
+  return'recon sweep '+v;
+}
+function reconSweep(inputId){
+  const cmd=buildSweepCmd(inputId);
+  if(cmd)reconRun(cmd);
+}
 function reconRunTarget(prefix){
   const ip=$('recon-target').value.trim();
   if(!ip){termLog('[ERR] Enter a target IP','term-alert');return;}
@@ -2275,8 +2296,11 @@ $('map-auto').addEventListener('click',function(){
 $('map-reset-view').addEventListener('click',mapResetView);
 $('map-sweep').addEventListener('click',async()=>{
   if(!serialConnected)return;
+  const cmd=buildSweepCmd('map-sweep-cidr');
+  if(!cmd)return;
   $('map-info').textContent='Sweeping...';
-  await serialQuery('web exec recon sweep',15000);
+  // Wider CIDR ranges take longer; allow up to 60s for /16-/22 sweeps.
+  await serialQuery('web exec '+cmd,60000);
   setTimeout(refreshMap,2000);
 });
 
