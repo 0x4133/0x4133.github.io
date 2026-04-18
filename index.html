@@ -135,6 +135,18 @@ font-size:11px;border-radius:3px;font-family:inherit;width:130px}
 .cmd-toast.ok{background:#0f1f0f;color:var(--accent);border:1px solid #1a3a1a}
 .cmd-toast.err{background:#1a0a0a;color:var(--red);border:1px solid var(--red)}
 
+/* IP Selector */
+.ip-selector{position:relative;display:inline-flex;align-items:center;gap:2px}
+.ip-refresh-btn{background:var(--bg);color:var(--dim);border:1px solid var(--border);
+padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit;cursor:pointer;
+min-width:24px;text-align:center}
+.ip-refresh-btn:hover{color:var(--accent);border-color:var(--accent)}
+.ip-dropdown{background:var(--bg);color:var(--text);border:1px solid var(--accent);
+padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit;
+position:absolute;top:100%;left:0;z-index:10;min-width:200px;max-height:200px;overflow-y:auto}
+.ip-dropdown optgroup{font-weight:bold;color:var(--accent);padding:2px 0}
+.ip-dropdown option{color:var(--text);font-weight:normal;padding:2px 4px}
+
 /* Rules */
 .rules-list{flex:1;overflow-y:auto;padding:8px 12px}
 .rule-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--border);
@@ -232,6 +244,17 @@ padding:1px 6px;font-size:9px;border-radius:2px;font-family:inherit;cursor:point
 .alert-row .a-actions button:hover{color:var(--accent);border-color:var(--accent)}
 .tab .badge{background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;
 margin-left:4px;vertical-align:top}
+
+/* IP Dropdown */
+.ip-selector{position:relative;display:inline-block}
+.ip-dropdown{background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:4px 8px;font-size:11px;border-radius:3px;font-family:inherit;min-width:140px;max-width:200px}
+.ip-dropdown:hover{border-color:var(--accent)}
+.ip-dropdown option{background:var(--s1);color:var(--text);padding:2px}
+.ip-refresh-btn{background:var(--s2);border:1px solid var(--border);color:var(--text);
+padding:4px 6px;font-size:10px;border-radius:3px;margin-left:4px;cursor:pointer}
+.ip-refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ip-info{font-size:10px;color:var(--dim);margin-left:8px}
 </style>
 </head>
 <body>
@@ -360,11 +383,65 @@ margin-left:4px;vertical-align:top}
         <button class="ctrl-btn" onclick="execCmd('dhcpstarve start')">Start</button>
         <button class="ctrl-btn danger" onclick="execCmd('dhcpstarve stop')">Stop</button></div>
     </div>
+    <div class="ctrl-section"><h3>WPA Handshake Capture + Crack</h3>
+      <div class="ctrl-row" style="font-size:11px;color:var(--dim);flex-wrap:wrap">
+        Captures WPA/WPA2 4-way handshakes and PMKIDs in promiscuous mode, exports hashcat 22000, or cracks on-device with PBKDF2-HMAC-SHA1 (HW-accelerated, ~50–200 pw/s — small dictionaries only).
+      </div>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="wpa-ch" placeholder="Channel (blank = hop)">
+        <input class="ctrl-input" id="wpa-bssid" placeholder="BSSID filter (optional AA:BB:..)">
+        <button class="ctrl-btn" onclick="wpaStart()">Capture Start</button>
+        <button class="ctrl-btn danger" onclick="execCmd('wpa capture stop')">Stop</button>
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="wpaRefresh()">Refresh List</button>
+        <button class="ctrl-btn" onclick="execCmd('wpa clear')">Clear</button>
+      </div>
+      <div class="ctrl-row" id="wpa-list" style="flex-direction:column;gap:4px;font-size:11px;color:var(--dim)">
+        <span>No captures yet.</span>
+      </div>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="wpa-idx" placeholder="idx" style="max-width:50px">
+        <input class="ctrl-input" id="wpa-wordlist" placeholder="/wordlists/rockyou-top10k.txt">
+        <button class="ctrl-btn" onclick="wpaCrack()">Crack</button>
+        <button class="ctrl-btn danger" onclick="execCmd('wpa crack stop')">Stop Crack</button>
+      </div>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="wpa-export-path" placeholder="/wpa.hc22000">
+        <button class="ctrl-btn" onclick="execCmd('wpa export '+($('wpa-idx').value||'0')+' '+($('wpa-export-path').value||'/wpa.hc22000'))">Export hc22000</button>
+      </div>
+      <div class="ctrl-row" style="font-size:11px;color:var(--dim)">
+        <span id="wpa-status">Idle</span>
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Attack Mode (Playbook Orchestrator)</h3>
+      <div class="ctrl-row" style="font-size:11px;color:var(--dim);flex-wrap:wrap">
+        Chains real attacks: <b>credgrab</b>=MitM+DNS+LLMNR&nbsp;|&nbsp;<b>blackhole</b>=MitM+DNS→0.0.0.0+RST&nbsp;|&nbsp;<b>dhcpx</b>=DHCP-flood+LLMNR&nbsp;|&nbsp;<b>killchain</b>=auto sweep→MitM→DNS→RST
+      </div>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="am-victim" placeholder="Victim IP (LAN host — NOT the gateway)">
+        <input class="ctrl-input" id="am-spoof" placeholder="Spoof IP (optional, defaults to us)">
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="attackModeLaunch('credgrab')">credgrab</button>
+        <button class="ctrl-btn" onclick="attackModeLaunch('blackhole')">blackhole</button>
+        <button class="ctrl-btn" onclick="attackModeLaunch('dhcpx')">dhcpx</button>
+        <button class="ctrl-btn" onclick="attackModeLaunch('killchain')">killchain</button>
+        <button class="ctrl-btn danger" onclick="execCmd('attackmode stop')">Stop</button>
+      </div>
+      <div class="ctrl-row" style="font-size:11px;color:var(--dim)">
+        <span id="am-status">Inactive</span>
+      </div>
+    </div>
     <div class="ctrl-section"><h3>Wireless</h3>
       <div class="ctrl-row"><label>WiFi</label>
-        <button class="ctrl-btn" onclick="execCmd('wifi scan')">Scan</button>
+        <button class="ctrl-btn" onclick="wifiScanRefresh()">Scan</button>
+        <button class="ctrl-btn" onclick="wifiRefreshTargets()" title="Repopulate SSID/BSSID dropdowns from last cached scan">Refresh Targets</button>
         <button class="ctrl-btn" onclick="execCmd('wifi auto 30')">Auto 30s</button>
-        <button class="ctrl-btn" onclick="execCmd('wifi auto off')">Auto Off</button></div>
+        <button class="ctrl-btn" onclick="execCmd('wifi auto off')">Auto Off</button>
+        <button class="ctrl-btn" onclick="execCmd('wifi probe-tx')" title="Verify raw 802.11 TX sanity-check bypass (expect Beacon TX: 0x0 BYPASS OK)">Probe TX</button></div>
+      <datalist id="wifi-ssids"></datalist>
+      <datalist id="wifi-bssids"></datalist>
       <div class="ctrl-row"><label>BLE</label>
         <button class="ctrl-btn" onclick="execCmd('ble scan')">Scan 5s</button>
         <button class="ctrl-btn" onclick="execCmd('ble scan 10')">Scan 10s</button></div>
@@ -402,6 +479,74 @@ margin-left:4px;vertical-align:top}
         <button class="ctrl-btn" onclick="execCmd(buildSweepCmd('ctl-sweep-cidr'))">ARP Sweep</button>
         <input class="ctrl-input" id="kill-ip" placeholder="Target IP">
         <button class="ctrl-btn danger" onclick="execCmd('kill '+$('kill-ip').value.trim())">Kill Conns</button>
+      </div>
+    </div>
+    <div class="ctrl-section"><h3>Active Blocking</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="execCmd('block')">Toggle Blocking</button>
+        <button class="ctrl-btn" onclick="execCmd('block status')">Show Blacklist</button>
+        <input class="ctrl-input" id="block-ip" placeholder="IP to block">
+        <button class="ctrl-btn danger" onclick="blockIP()">Block IP</button>
+        <button class="ctrl-btn" onclick="execCmd('block clear')">Clear All</button>
+      </div>
+    </div>
+
+    <div class="ctrl-section"><h3>Honeypot (Ethernet)</h3>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="execCmd('honeypot start')">Start (port 80)</button>
+        <input class="ctrl-input" id="hp-port" placeholder="Port" style="width:70px" value="80">
+        <button class="ctrl-btn" onclick="execCmd('honeypot start '+$('hp-port').value.trim())">Start Custom</button>
+        <button class="ctrl-btn danger" onclick="execCmd('honeypot stop')">Stop</button>
+        <button class="ctrl-btn" onclick="execCmd('honeypot status')">Status</button>
+        <button class="ctrl-btn" onclick="execCmd('honeypot log')">View Log</button>
+      </div>
+      <div class="ctrl-row">
+        <input class="ctrl-input" id="hp-title" placeholder="Page title (e.g. TP-Link Archer)" style="width:200px">
+        <button class="ctrl-btn" onclick="execCmd('honeypot title '+$('hp-title').value.trim())">Set Title</button>
+        <input class="ctrl-input" id="hp-banner" placeholder="Banner text" style="width:200px">
+        <button class="ctrl-btn" onclick="execCmd('honeypot banner '+$('hp-banner').value.trim())">Set Banner</button>
+      </div>
+    </div>
+
+    <div class="ctrl-section"><h3>MITRE ATT&CK TTPs</h3>
+      <div class="ctrl-row">
+        <label>Discovery:</label>
+        <input class="ctrl-input" id="mitre-target" placeholder="Target IP" style="width:120px">
+        <button class="ctrl-btn" onclick="mitreExecute('t1046', 'mitre-target')">T1046 Service Scan</button>
+        <button class="ctrl-btn" onclick="mitreExecute('t1083', 'mitre-target')">T1083 File Discovery</button>
+        <button class="ctrl-btn" onclick="execCmd('mitre t1040')">T1040 Cred Harvest</button>
+      </div>
+      <div class="ctrl-row">
+        <label>Lateral Movement:</label>
+        <button class="ctrl-btn" onclick="mitreExecute('t1021.001', 'mitre-target')">T1021.001 RDP</button>
+        <button class="ctrl-btn" onclick="mitreExecute('t1021.002', 'mitre-target')">T1021.002 SMB</button>
+        <button class="ctrl-btn" onclick="mitreExecute('t1021.004', 'mitre-target')">T1021.004 SSH</button>
+      </div>
+      <div class="ctrl-row">
+        <label>C2 Simulation:</label>
+        <button class="ctrl-btn" onclick="execCmd('mitre t1071.001')">T1071.001 HTTP C2</button>
+        <button class="ctrl-btn" onclick="execCmd('mitre t1071.004')">T1071.004 DNS C2</button>
+      </div>
+      <div class="ctrl-row">
+        <label>WiFi Attacks:</label>
+        <input class="ctrl-input" id="mitre-ssid" list="wifi-ssids" placeholder="Target SSID (scan first)" style="width:170px">
+        <button class="ctrl-btn" onclick="mitreExecute('t1566 evil', 'mitre-ssid')">T1566 Evil Twin</button>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1566 deauth', 'mitre-ssid')">T1566 Deauth</button>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1566 beacon', 'mitre-ssid')">T1566 Beacon Flood</button>
+        <button class="ctrl-btn" onclick="execCmd('mitre t1566 karma')">T1566 KARMA</button>
+      </div>
+      <div class="ctrl-row">
+        <label>Raw Deauth:</label>
+        <input class="ctrl-input" id="wifi-bssid" list="wifi-bssids" placeholder="AP BSSID (AA:BB:CC:DD:EE:FF)" style="width:200px">
+        <input class="ctrl-input" id="wifi-deauth-count" placeholder="count (100)" style="width:90px">
+        <button class="ctrl-btn danger" onclick="wifiDeauthByBssid()" title="Send raw 802.11 deauth frames to the chosen AP (channel auto-detected from scan)">Deauth by BSSID</button>
+      </div>
+      <div class="ctrl-row">
+        <label>DoS/Impact:</label>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1499 ping', 'mitre-target')">T1499 Ping of Death</button>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1499 tcp', 'mitre-target')">T1499 TCP RST</button>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1498 syn', 'mitre-target')">T1498 SYN Flood</button>
+        <button class="ctrl-btn danger" onclick="mitreExecute('t1498 icmp', 'mitre-target')">T1498 ICMP Flood</button>
       </div>
     </div>
   </div>
@@ -759,6 +904,7 @@ function termLog(text,cls){
 // ══════════════════════════════════════
 let statusTimer=null;
 let deviceStatus={};
+let wpaPollTick=0;
 
 async function pollStatus(){
   if(!serialConnected)return;
@@ -791,6 +937,92 @@ async function pollStatus(){
   $('s-udp').textContent=s.udp??'-';
   $('s-arp').textContent=s.arp??'-';
   $('s-icmp').textContent=s.icmp??'-';
+  // WPA live status line (lightweight — doesn't fetch full caps list)
+  const ws=$('wpa-status');
+  if(ws){
+    let t='';
+    if(s.wpaCapture) t+='CAPTURING · '+(s.wpaFrames||0)+' frames · '+(s.wpaEapol||0)+' EAPOL';
+    else t+='Capture idle';
+    if(s.wpaCrack) t+=' · CRACKING · tried='+(s.wpaTried||0)+' @ '+(s.wpaRate||0)+'/s';
+    if(s.wpaFound) t+=' · <b style="color:var(--green)">PASSPHRASE FOUND</b>';
+    ws.innerHTML=t;
+  }
+  // Auto-refresh caps list while capture or crack is running (and Control tab is visible)
+  if((s.wpaCapture||s.wpaCrack) && $('tab-control')?.classList.contains('active')){
+    wpaPollTick=(wpaPollTick||0)+1;
+    if(wpaPollTick%2===0) wpaRefresh();
+  }
+  const am=$('am-status');
+  if(am){
+    if(s.attackMode){
+      am.innerHTML='<span style="color:var(--red)">ACTIVE</span> &middot; '
+        +'<b>'+(s.attackModePlaybook||'?')+'</b> &middot; '
+        +'target '+(s.attackModeTarget||'—')+' &middot; '
+        +'spoof '+(s.attackModeSpoof||'—')+' &middot; '
+        +'step '+(s.attackModeStep??0)+' &middot; '
+        +(s.attackModeActions??0)+' actions';
+    } else {
+      am.textContent='Inactive';
+    }
+  }
+}
+
+async function wpaRefresh(){
+  if(!serialConnected){addMsg('error','Not connected.');return;}
+  const r=await serialQuery('web wpa');
+  if(!r){return;}
+  const box=$('wpa-list');
+  if(!r.caps||!r.caps.length){box.innerHTML='<span>No captures yet. Click Capture Start.</span>';}
+  else{
+    box.innerHTML=r.caps.map(c=>{
+      const tags=[];
+      if(c.p) tags.push('PMKID'); else {
+        if(c.a) tags.push('A'); if(c.s) tags.push('S'); if(c.m) tags.push('M');
+      }
+      const mark=c.crackable?'<span style="color:var(--green)">✔</span>':'<span style="color:var(--dim)">…</span>';
+      return '['+c.idx+'] '+mark+' <b>'+(c.ssid||'?')+'</b> '+c.bssid+' ← '+c.client+' ['+tags.join('')+'] v'+c.keyver;
+    }).join('<br>');
+  }
+  const s=$('wpa-status');
+  let txt='';
+  if(r.capture) txt+='CAPTURING (ch '+(r.channel||'hop')+') · '+r.frames+' frames · '+r.eapol+' EAPOL';
+  else txt+='Capture idle';
+  if(r.crack){ txt+=' · CRACKING idx='+r.crackIdx+' · tried='+r.tried+' @ '+r.rate+'/s'; }
+  if(r.found){ txt+=' · <b style="color:var(--green)">FOUND: '+r.result+'</b>'; }
+  s.innerHTML=txt;
+}
+
+function wpaStart(){
+  const ch=$('wpa-ch').value.trim();
+  const bssid=$('wpa-bssid').value.trim();
+  let cmd='wpa capture start';
+  if(ch) cmd+=' ch '+ch;
+  if(bssid) cmd+=' bssid '+bssid;
+  execCmd(cmd);
+  setTimeout(wpaRefresh,400);
+}
+function wpaCrack(){
+  const idx=$('wpa-idx').value.trim();
+  const wl=$('wpa-wordlist').value.trim();
+  if(!idx||!wl){addMsg('error','WPA crack needs idx + wordlist path.');return;}
+  execCmd('wpa crack '+idx+' '+wl);
+}
+
+function attackModeLaunch(playbook){
+  const v=$('am-victim').value.trim();
+  const sp=$('am-spoof').value.trim();
+  if((playbook==='credgrab'||playbook==='blackhole') && !v){
+    addMsg('error','Playbook "'+playbook+'" requires a victim IP.');
+    return;
+  }
+  let cmd='attackmode start '+playbook;
+  if(playbook==='credgrab'||playbook==='blackhole'){
+    cmd+=' '+v;
+    if(sp) cmd+=' '+sp;
+  } else if(playbook==='killchain'){
+    if(sp) cmd+=' '+sp;
+  }
+  execCmd(cmd);
 }
 
 // ══════════════════════════════════════
@@ -1432,36 +1664,120 @@ async function fileOpen(path){
   currentFilePath=path;
   $('files-editing').textContent='Loading...';
   $('files-editing').style.display='inline';
-  // fileread responses have ok:true + data field — goes to exec queue
-  const r=await serialQuery('web fileread '+path);
-  if(!r||!r.ok){
-    $('files-editor').value='Error: '+(r?.msg||'no response');
-    $('files-editor').readOnly=true;
-    $('files-editor-toolbar').style.display='none';
-    $('files-editing').style.display='none';
-    return;
+
+  // Try chunked read first, fall back to legacy if not supported
+  let r = await serialQuery(`web fileread_chunk ${path} 0 4096`);
+
+  if (!r || !r.ok || r.msg === 'Unknown command') {
+    // Fall back to legacy single-shot read
+    $('files-editing').textContent='Loading (legacy mode)...';
+    r = await serialQuery('web fileread '+path);
+    if(!r||!r.ok){
+      $('files-editor').value='Error: '+(r?.msg||'no response');
+      $('files-editor').readOnly=true;
+      $('files-editor-toolbar').style.display='none';
+      $('files-editing').style.display='none';
+      return;
+    }
+    $('files-editor').value=r.data||'';
+    $('files-editor').readOnly=false;
+    $('files-editor-toolbar').style.display='flex';
+    $('files-path').textContent=path+' ('+fmtBytes(r.size)+')';
+    $('files-editing').textContent='Editing: '+path;
+  } else {
+    // Chunked mode supported
+    let fullData = r.data || '';
+    let totalSize = r.size || 0;
+    let offset = 4096;
+
+    // Continue reading chunks if needed
+    while (r.moreData) {
+      const progress = Math.min(100, Math.floor((offset / totalSize) * 100));
+      $('files-editing').textContent = `Loading... ${progress}%`;
+
+      r = await serialQuery(`web fileread_chunk ${path} ${offset} 4096`);
+      if (!r || !r.ok) {
+        $('files-editor').value = 'Error reading chunk: ' + (r?.msg || 'no response');
+        $('files-editor').readOnly = true;
+        $('files-editor-toolbar').style.display = 'none';
+        $('files-editing').style.display = 'none';
+        return;
+      }
+
+      fullData += r.data || '';
+      offset += 4096;
+    }
+
+    $('files-editor').value = fullData;
+    $('files-editor').readOnly = false;
+    $('files-editor-toolbar').style.display = 'flex';
+    $('files-path').textContent = path + ' (' + fmtBytes(totalSize) + ')';
+    $('files-editing').textContent = 'Editing: ' + path;
   }
-  $('files-editor').value=r.data||'';
-  $('files-editor').readOnly=false;
-  $('files-editor-toolbar').style.display='flex';
-  $('files-path').textContent=path+' ('+fmtBytes(r.size)+')';
-  $('files-editing').textContent='Editing: '+path;
 
   // Highlight active in list
   document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.file-item').forEach(el=>{
     if(el.textContent.includes(path)) el.classList.add('active');
   });
+  $('files-editing').style.display='none';
 }
 
 async function fileSave(){
-  if(!currentFilePath)return;
-  const content=$('files-editor').value;
-  // Escape newlines for transport
-  const escaped=content.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\r/g,'\\r').replace(/\t/g,'\\t');
-  const r=await serialQuery('web filewrite '+currentFilePath+' '+escaped);
-  if(r) termLog(r.ok?'[OK] '+(r.msg||'Saved'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
-  refreshFiles();
+  if(!currentFilePath) return;
+  const content = $('files-editor').value;
+
+  $('files-editing').textContent = 'Saving...';
+  $('files-editing').style.display = 'inline';
+
+  // Try chunked write first
+  let r = await serialQuery(`web filewrite_start ${currentFilePath} ${content.length}`);
+
+  if (!r || !r.ok || r.msg === 'Unknown command') {
+    // Fall back to legacy single-shot write
+    $('files-editing').textContent = 'Saving (legacy mode)...';
+    const escaped = content.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\r/g,'\\r').replace(/\t/g,'\\t');
+    r = await serialQuery('web filewrite '+currentFilePath+' '+escaped);
+    if(r) termLog(r.ok?'[OK] '+(r.msg||'Saved'):'[ERR] '+(r.msg||'failed'), r.ok?'term-cmd':'term-alert');
+    $('files-editing').style.display = 'none';
+    refreshFiles();
+    return;
+  }
+
+  // Chunked mode supported
+  const chunkSize = 4000;  // Smaller than read chunks to account for escaping overhead
+  try {
+    // Send content in chunks
+    for (let offset = 0; offset < content.length; offset += chunkSize) {
+      const chunk = content.slice(offset, offset + chunkSize);
+      // Escape the chunk for transport
+      const escaped = chunk.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\r/g,'\\r').replace(/\t/g,'\\t');
+
+      const progress = Math.floor((offset / content.length) * 100);
+      $('files-editing').textContent = `Saving... ${progress}%`;
+
+      r = await serialQuery(`web filewrite_chunk ${currentFilePath} ${offset} ${escaped}`);
+      if (!r || !r.ok) {
+        termLog('[ERR] Failed to write chunk at ' + offset + ': ' + (r?.msg || 'no response'), 'term-alert');
+        $('files-editing').style.display = 'none';
+        return;
+      }
+    }
+
+    // End chunked write
+    r = await serialQuery(`web filewrite_end ${currentFilePath}`);
+    if (r) {
+      termLog(r.ok ? '[OK] ' + (r.msg || 'Saved') : '[ERR] ' + (r.msg || 'failed'),
+              r.ok ? 'term-cmd' : 'term-alert');
+    }
+
+    $('files-editing').style.display = 'none';
+    refreshFiles();
+
+  } catch (e) {
+    termLog('[ERR] Save failed: ' + e.message, 'term-alert');
+    $('files-editing').style.display = 'none';
+  }
 }
 
 async function fileDelete(){
@@ -2222,6 +2538,233 @@ function switchTab(name){document.querySelectorAll('.tab').forEach(t=>t.classLis
 function autoResize(){const el=$('user-input');el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 
 // ══════════════════════════════════════
+//  IP Selector / Known IPs Dropdown
+// ══════════════════════════════════════
+
+let knownIPs = [];
+
+async function refreshKnownIPs() {
+  if (!serialConnected) return;
+  try {
+    const result = await serialQuery('web knownips');
+    if (result && result.knownIPs) {
+      knownIPs = result.knownIPs;
+      updateAllIPDropdowns();
+    }
+  } catch (e) {
+    console.log('Failed to fetch known IPs:', e);
+  }
+}
+
+function updateAllIPDropdowns() {
+  document.querySelectorAll('.ip-dropdown').forEach(updateIPDropdown);
+}
+
+function updateIPDropdown(dropdown) {
+  const currentValue = dropdown.value;
+
+  // Clear existing options
+  dropdown.innerHTML = '<option value="">Select known IP...</option>';
+
+  // Group IPs by type
+  const groups = {};
+  knownIPs.forEach(ip => {
+    if (!groups[ip.type]) groups[ip.type] = [];
+    groups[ip.type].push(ip);
+  });
+
+  // Add options by group
+  ['Self', 'Gateway', 'DHCP', 'Host', 'Scanned', 'Blocked'].forEach(type => {
+    if (groups[type]) {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = type;
+      groups[type].forEach(ip => {
+        const option = document.createElement('option');
+        option.value = ip.ip;
+        option.textContent = `${ip.ip} - ${ip.info}`;
+        optgroup.appendChild(option);
+      });
+      dropdown.appendChild(optgroup);
+    }
+  });
+
+  // Restore previous value if still available
+  if (currentValue) {
+    dropdown.value = currentValue;
+  }
+}
+
+function createIPSelector(inputId, placeholder = 'IP Address') {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  // Create wrapper
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ip-selector';
+  input.parentNode.insertBefore(wrapper, input);
+
+  // Create dropdown
+  const dropdown = document.createElement('select');
+  dropdown.className = 'ip-dropdown';
+  dropdown.style.display = 'none';
+
+  // Create toggle button
+  const toggleBtn = document.createElement('button');
+  toggleBtn.textContent = '📋';
+  toggleBtn.className = 'ip-refresh-btn';
+  toggleBtn.title = 'Select from known IPs';
+  toggleBtn.type = 'button';
+
+  // Move input and add elements
+  wrapper.appendChild(input);
+  wrapper.appendChild(toggleBtn);
+  wrapper.appendChild(dropdown);
+
+  let dropdownVisible = false;
+
+  toggleBtn.addEventListener('click', async () => {
+    if (!dropdownVisible) {
+      await refreshKnownIPs();
+      updateIPDropdown(dropdown);
+      dropdown.style.display = 'inline-block';
+      input.style.display = 'none';
+      dropdownVisible = true;
+    } else {
+      dropdown.style.display = 'none';
+      input.style.display = 'inline-block';
+      dropdownVisible = false;
+    }
+  });
+
+  dropdown.addEventListener('change', () => {
+    if (dropdown.value) {
+      input.value = dropdown.value;
+      dropdown.style.display = 'none';
+      input.style.display = 'inline-block';
+      dropdownVisible = false;
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) {
+      dropdown.style.display = 'none';
+      input.style.display = 'inline-block';
+      dropdownVisible = false;
+    }
+  });
+}
+
+function blockIP() {
+  const ip = $('block-ip').value.trim();
+  if (!ip) {
+    addMsg('error', 'Enter an IP address to block.');
+    return;
+  }
+  const reason = prompt('Block reason (optional):', 'Manual block') || 'Manual block';
+  execCmd(`block add ${ip} ${reason}`);
+  $('block-ip').value = '';
+}
+
+function mitreExecute(technique, inputId) {
+  const target = $(inputId).value.trim();
+  if (!target) {
+    addMsg('error', `Enter a ${inputId.includes('target') ? 'target IP' : 'value'} for ${technique}.`);
+    return;
+  }
+  execCmd(`mitre ${technique} ${target}`);
+}
+
+// Populate the SSID and BSSID datalists from the firmware's cached wifi
+// table (`web wifi` returns the same JSON shape the scanner uses).
+async function wifiRefreshTargets(silent) {
+  if (!serialConnected) { if (!silent) addMsg('error', 'Not connected.'); return 0; }
+  const nets = await serialQuery('web wifi');
+  if (!Array.isArray(nets)) { if (!silent) addMsg('error', 'No WiFi data (scan first).'); return 0; }
+  const ssidList = $('wifi-ssids');
+  const bssidList = $('wifi-bssids');
+  ssidList.innerHTML = '';
+  bssidList.innerHTML = '';
+  // Dedupe SSIDs (multiple BSSIDs can share one SSID)
+  const seenSsid = new Set();
+  for (const n of nets) {
+    if (n.ssid && !n.hidden && !seenSsid.has(n.ssid)) {
+      seenSsid.add(n.ssid);
+      const o = document.createElement('option');
+      o.value = n.ssid;
+      o.label = `CH${n.ch} ${n.rssi}dBm ${n.enc}`;
+      ssidList.appendChild(o);
+    }
+    if (n.bssid) {
+      const o = document.createElement('option');
+      o.value = n.bssid;
+      o.label = `${n.ssid || '(hidden)'} CH${n.ch} ${n.rssi}dBm`;
+      bssidList.appendChild(o);
+    }
+  }
+  if (!silent) addMsg('info', `WiFi targets: ${seenSsid.size} SSID(s), ${nets.length} BSSID(s).`);
+  return nets.length;
+}
+
+// Kick off a scan, then poll `web wifi` a few times until results appear
+// (scanner is async, typically 2–3s). Populates datalists automatically.
+async function wifiScanRefresh() {
+  if (!serialConnected) { addMsg('error', 'Not connected.'); return; }
+  await execCmd('wifi scan');
+  for (let i = 0; i < 8; i++) {
+    await new Promise(r => setTimeout(r, 700));
+    const n = await wifiRefreshTargets(true);
+    if (n > 0) { addMsg('info', `WiFi scan complete: ${n} networks.`); return; }
+  }
+  addMsg('warn', 'Scan started but no networks returned yet — try Refresh Targets in a few seconds.');
+}
+
+// Raw deauth by BSSID — channel comes from the cached scan (firmware also
+// auto-resolves it, but `wifi deauth <BSSID> [target] [ch] [count]` is
+// positional, so if we want to pass count we must pass a valid channel.)
+async function wifiDeauthByBssid() {
+  const bssid = $('wifi-bssid').value.trim().toUpperCase();
+  if (!/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(bssid)) {
+    addMsg('error', 'Enter a valid BSSID (AA:BB:CC:DD:EE:FF).');
+    return;
+  }
+  const countStr = $('wifi-deauth-count').value.trim();
+  if (countStr && !/^[0-9]+$/.test(countStr)) { addMsg('error', 'Invalid count.'); return; }
+  if (!countStr) {
+    // Firmware defaults: broadcast target, auto-detected channel, 100 frames.
+    execCmd(`wifi deauth ${bssid}`);
+    return;
+  }
+  // Need to pass channel so count lands in the right slot.
+  const nets = await serialQuery('web wifi');
+  let ch = 1;
+  if (Array.isArray(nets)) {
+    const m = nets.find(n => (n.bssid || '').toUpperCase() === bssid);
+    if (m && m.ch) ch = m.ch;
+    else addMsg('warn', `BSSID not in cached scan — falling back to channel 1. Run Scan for auto channel.`);
+  }
+  execCmd(`wifi deauth ${bssid} FF:FF:FF:FF:FF:FF ${ch} ${countStr}`);
+}
+
+function initIPSelectors() {
+  // Add IP selectors to all IP input fields
+  createIPSelector('mitm-ip', 'Victim IP');
+  createIPSelector('dns-ip', 'Redirect IP');
+  createIPSelector('ctl-sweep-cidr', 'IP/CIDR');
+  createIPSelector('kill-ip', 'Target IP');
+  createIPSelector('block-ip', 'IP to block');
+  createIPSelector('recon-sweep-cidr', 'IP/CIDR');
+  createIPSelector('recon-target', 'Target IP');
+  createIPSelector('map-sweep-cidr', 'IP/CIDR');
+  createIPSelector('mitre-target', 'MITRE Target IP');
+
+  // Note: mitre-ssid doesn't need IP selector since it's for WiFi SSIDs
+
+  // Auto-refresh known IPs periodically
+  setInterval(refreshKnownIPs, 30000); // Every 30 seconds
+}
+
+// ══════════════════════════════════════
 //  Event Wiring
 // ══════════════════════════════════════
 $('connect-btn').addEventListener('click',serialConnect);
@@ -2321,7 +2864,7 @@ mermaid.initialize({startOnLoad:false,theme:'dark',themeVariables:{
   lineColor:'#444',secondaryColor:'#1a1a1a',tertiaryColor:'#111',
   fontFamily:'Courier New, monospace',fontSize:'12px'
 }});
-updateModels();loadSettings();
+updateModels();loadSettings();initIPSelectors();
 if(!navigator.serial)addMsg('error','Web Serial API not supported. Use Chrome or Edge.');
 </script>
 </body>
