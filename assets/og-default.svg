@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-labelledby="t">
+  <title id="t">Hexworks — Applied Cyber R&amp;D. Research. Build. Break. Improve.</title>
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="glow" cx="0.82" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#ffb547" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#ffb547" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0e1013" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#0e1013" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0e1013"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- PCB traces + waveform (right side) -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#2d333c" stroke-width="1.6">
+      <path d="M820 120H940L980 160H1200"/>
+      <path d="M860 160H930L970 200H1080L1100 220H1200"/>
+      <path d="M880 440H990L1030 400H1200"/>
+      <path d="M840 480H1010L1050 440H1140L1160 460H1200"/>
+      <path d="M1040 120V60H1200"/>
+      <path d="M1000 520V580"/>
+      <path d="M1120 220V260"/>
+    </g>
+    <g fill="#0e1013" stroke="#2d333c" stroke-width="1.6">
+      <circle cx="820" cy="120" r="5"/>
+      <circle cx="860" cy="160" r="5"/>
+      <circle cx="880" cy="440" r="5"/>
+      <circle cx="840" cy="480" r="5"/>
+      <circle cx="1040" cy="120" r="5"/>
+      <circle cx="1000" cy="520" r="5"/>
+    </g>
+    <rect x="1060" y="260" width="80" height="110" rx="6" stroke="#2d333c" stroke-width="1.6"/>
+    <g stroke="#2d333c" stroke-width="1.4">
+      <path d="M1060 280h-12M1060 300h-12M1060 320h-12M1060 340h-12M1060 360h-12"/>
+      <path d="M1140 280h12M1140 300h12M1140 320h12M1140 340h12M1140 360h12"/>
+    </g>
+    <!-- waveform -->
+    <path d="M800 310 H860 L872 310 L880 290 L888 332 L896 270 L904 352 L912 250 L920 368 L928 262 L936 344 L944 288 L952 326 L960 300 L968 316 L976 310 H1040"
+          stroke="#ffb547" stroke-width="1.6" opacity="0.75"/>
+    <circle cx="1040" cy="310" r="4" fill="#ffb547" stroke="none" opacity="0.75"/>
+    <path d="M800 340 H1040" stroke="#6cd3ff" stroke-width="1" opacity="0.35" stroke-dasharray="2 6"/>
+  </g>
+  <rect width="1200" height="630" fill="url(#fade)"/>
+
+  <!-- registration marks -->
+  <g fill="none" stroke="#7c8590" stroke-width="1.4">
+    <path d="M24 48V24H48 M1152 24H1176V48 M1176 582V606H1152 M48 606H24V582"/>
+  </g>
+
+  <!-- mark + wordmark -->
+  <g transform="translate(80 84) scale(1.75)">
+    <polygon points="16,2.5 27.7,9.25 27.7,22.75 16,29.5 4.3,22.75 4.3,9.25" fill="none" stroke="#ffb547" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon points="16,9 22.06,12.5 22.06,19.5 16,23 9.94,19.5 9.94,12.5" fill="#ffb547" fill-opacity="0.18" stroke="#ffb547" stroke-width="1" stroke-linejoin="round"/>
+    <circle cx="16" cy="16" r="2.2" fill="#ffb547"/>
+  </g>
+  <text x="152" y="121" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace" font-size="20" font-weight="600" letter-spacing="5" fill="#e7e9ec">HEXWORKS</text>
+
+  <!-- headline -->
+  <text x="80" y="292" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace" font-size="16" letter-spacing="3" fill="#7c8590">// APPLIED CYBER RESEARCH LAB</text>
+  <text x="76" y="376" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="72" font-weight="600" fill="#e7e9ec">Applied Cyber R&amp;D</text>
+  <text x="80" y="436" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace" font-size="26" fill="#ffb547">Research. Build. Break. Improve.</text>
+
+  <!-- footer -->
+  <line x1="80" y1="530" x2="720" y2="530" stroke="#2d333c" stroke-width="1.2"/>
+  <text x="80" y="562" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace" font-size="15" letter-spacing="2.5" fill="#7c8590">WIRELESS · SOC AUTOMATION · VULN RESEARCH</text>
+</svg>
