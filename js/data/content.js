@@ -192,6 +192,11 @@ Ethernet and the SD card sit on separate SPI buses to avoid contention; the W550
 - A host-side replay harness so the browser UI can be tested without hardware`,
     links: [
       {
+        kind: 'download',
+        label: 'eth0.zip (v1)',
+        url: 'https://github.com/0x4133/0x4133.github.io/releases/download/V1/eth0.zip',
+      },
+      {
         kind: 'docs',
         label: 'Serial JSON protocol',
         url: 'https://github.com/0x4133/eth0/blob/master/docs/serial-json-protocol.md',
