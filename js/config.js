@@ -9,5 +9,5 @@ export const config = {
   // Absolute site URL, used for OpenGraph links (set by the deploy workflow).
   siteUrl: '',
   githubUrl: 'https://github.com/',
-  contactEmail: 'lab@example.com',
+  contactEmail: 'me@0x4133.com',
 };

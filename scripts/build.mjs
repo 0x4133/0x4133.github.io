@@ -58,6 +58,10 @@ async function main() {
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
   for (const item of ['index.html', 'css', 'js', 'assets']) await cp(join(root, item), join(out, item), { recursive: true });
+  // editor + uploads are dev-only; never publish them
+  await rm(join(out, 'js', 'editor'), { recursive: true, force: true });
+  await rm(join(out, 'css', 'editor.css'), { force: true });
+  await rm(join(out, 'assets', 'uploads'), { recursive: true, force: true });
   await writeFile(join(out, '.nojekyll'), '');
   try { await cp(join(root, 'CNAME'), join(out, 'CNAME')); } catch { /* optional */ }
 

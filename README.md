@@ -26,9 +26,28 @@ To preview a production build:
 node scripts/build.mjs && node scripts/dev-server.mjs _site 4000
 ```
 
-## Adding content
+## Editing content (GUI)
 
-Open `js/data/content.js` and add an object to the right list. Long text fields are **Markdown**. Use backtick strings for multi-line text; inside them, escape literal backticks (for code blocks) as `` \` ``.
+There's a built-in content editor — a local web app for adding and editing projects, ideas, products and research notes without hand-editing the data file.
+
+```bash
+node scripts/dev-server.mjs                 # then open:
+#   http://localhost:8080/editor.html
+```
+
+In the editor you can:
+
+- switch between **Projects / Ideas / Products / Notes** tabs,
+- create, edit, duplicate and delete items with forms (Markdown fields have a toolbar and live preview),
+- add technologies and tags, set status, feature a project or put it on the bench,
+- drag-and-drop an image to upload it into `assets/uploads/`,
+- click **Save content.js** to write `js/data/content.js` back to disk (it keeps a `.bak`), then commit and push to publish.
+
+The editor is a **local development tool**. Its save/upload endpoints only accept connections from your own machine, and it is never included in the published site. Edits live in memory until you press Save, and Save overwrites the whole content file, so keep it open in one tab at a time. If you open `editor.html` without the dev server, Save falls back to downloading `content.js` for you to drop into `js/data/` yourself.
+
+## Editing content (by hand)
+
+You can also open `js/data/content.js` directly and add an object to the right list. Long text fields are **Markdown**. Use backtick strings for multi-line text; inside them, escape literal backticks (for code blocks) as `` \` ``.
 
 Images and files go in `assets/` (for example `assets/projects/my-sensor.jpg`) and are referenced by that relative path. Full `https://` URLs also work.
 
@@ -129,7 +148,10 @@ js/
   views/                   one module per page
 assets/                    favicon, link-preview image, diagrams, your images
 scripts/build.mjs          GitHub Pages build
-scripts/dev-server.mjs     local static server
+scripts/dev-server.mjs     local static server (+ editor save/upload endpoints)
+editor.html                content editor — dev only, not published
+css/editor.css             editor styles
+js/editor/                 editor app, widgets, content serialiser
 .github/workflows/deploy.yml
 ```
 
